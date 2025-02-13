@@ -1,0 +1,69 @@
+# Main stage
+FROM alpine:edge
+
+ARG VERSION_TAG
+
+LABEL org.opencontainers.image.title="Stirling-PDF"
+LABEL org.opencontainers.image.description="A powerful locally hosted web-based PDF manipulation tool supporting 50+ operations including merging, splitting, conversion, OCR, watermarking, and more."
+LABEL org.opencontainers.image.source="https://github.com/Stirling-Tools/Stirling-PDF"
+LABEL org.opencontainers.image.licenses="MIT"
+LABEL org.opencontainers.image.vendor="Stirling-Tools"
+LABEL org.opencontainers.image.url="https://www.stirlingpdf.com"
+LABEL org.opencontainers.image.documentation="https://docs.stirlingpdf.com"
+LABEL maintainer="Stirling-Tools"
+LABEL org.opencontainers.image.authors="Stirling-Tools"
+LABEL org.opencontainers.image.version="${VERSION_TAG}"
+LABEL org.opencontainers.image.keywords="PDF, manipulation, merge, split, convert, OCR, watermark"
+
+# Set Environment Variables
+ENV DOCKER_ENABLE_SECURITY=false \
+        VERSION_TAG=$VERSION_TAG \
+        JAVA_TOOL_OPTIONS="-XX:+UnlockExperimentalVMOptions \
+        -XX:MaxRAMPercentage=75 \
+        -XX:InitiatingHeapOccupancyPercent=20 \
+        -XX:+G1PeriodicGCInvokesConcurrent \
+        -XX:G1PeriodicGCInterval=10000 \
+        -XX:+UseStringDeduplication \
+        -XX:G1PeriodicGCSystemLoadThreshold=70" \
+        HOME=/home/stirlingpdfuser \
+        PUID=1000 \
+        PGID=1000 \
+        UMASK=022
+
+
+# JDK for app
+RUN echo "@testing https://dl-cdn.alpinelinux.org/alpine/edge/main" | tee -a /etc/apk/repositories && \
+        echo "@testing https://dl-cdn.alpinelinux.org/alpine/edge/community" | tee -a /etc/apk/repositories && \
+        echo "@testing https://dl-cdn.alpinelinux.org/alpine/edge/testing" | tee -a /etc/apk/repositories
+RUN apk upgrade  -a
+RUN apk add ca-certificates
+RUN apk add tzdata
+RUN apk add tini
+RUN apk add bash
+RUN apk add curl
+RUN apk add git
+
+RUN apk add qpdf
+RUN apk add shadow
+RUN apk add su-exec
+RUN apk add openssl
+RUN apk add openssl-dev
+RUN apk add openjdk21
+# Doc conversion
+RUN apk add libreoffice
+# pdftohtml
+RUN apk add poppler-utils
+# OCR MY PDF (unpaper for descew and other advanced features)
+RUN apk add tesseract-ocr-data-eng
+# python3/pip
+
+RUN apk add python3
+RUN apk add py3-pip
+RUN apk add py3-opencv
+RUN apk add -X https://dl-cdn.alpinelinux.org/alpine/edge/testing py3-unoconv
+RUN apk add -X https://dl-cdn.alpinelinux.org/alpine/edge/testing py3-pdf2image
+RUN apk add -X https://dl-cdn.alpinelinux.org/alpine/edge/testing py3-pillow
+
+RUN pip install --break-system-packages --upgrade WeasyPrint
+
+EXPOSE 8080/tcp
