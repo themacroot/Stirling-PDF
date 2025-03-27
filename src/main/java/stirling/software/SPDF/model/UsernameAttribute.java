@@ -4,6 +4,8 @@ import lombok.Getter;
 
 @Getter
 public enum UsernameAttribute {
+    UID("uid"),
+    MAIL("mail"),
     EMAIL("email"),
     LOGIN("login"),
     PROFILE("profile"),

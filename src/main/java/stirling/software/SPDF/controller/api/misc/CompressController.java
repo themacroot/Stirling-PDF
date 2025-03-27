@@ -119,7 +119,7 @@ public class CompressController {
             summary = "Optimize PDF file",
             description =
                     "This endpoint accepts a PDF file and optimizes it based on the provided"
-                        + " parameters. Input:PDF Output:PDF Type:SISO")
+                            + " parameters. Input:PDF Output:PDF Type:SISO")
     public ResponseEntity<byte[]> optimizePdf(@ModelAttribute OptimizePdfRequest request)
             throws Exception {
         MultipartFile inputFile = request.getFileInput();
@@ -222,7 +222,7 @@ public class CompressController {
             if (pdfBytes.length > inputFileSize) {
                 log.warn(
                         "Optimized file is larger than the original. Returning the original file"
-                            + " instead.");
+                                + " instead.");
                 finalFile = tempInputFile;
             }
 

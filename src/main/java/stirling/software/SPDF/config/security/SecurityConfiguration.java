@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -17,9 +16,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.saml2.provider.service.authentication.OpenSaml4AuthenticationProvider;
+import org.springframework.security.saml2.provider.service.authentication.OpenSaml5AuthenticationProvider;
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository;
-import org.springframework.security.saml2.provider.service.web.authentication.OpenSaml4AuthenticationRequestResolver;
+import org.springframework.security.saml2.provider.service.web.authentication.OpenSaml5AuthenticationRequestResolver;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
@@ -33,9 +32,6 @@ import lombok.extern.slf4j.Slf4j;
 import stirling.software.SPDF.config.security.oauth2.CustomOAuth2AuthenticationFailureHandler;
 import stirling.software.SPDF.config.security.oauth2.CustomOAuth2AuthenticationSuccessHandler;
 import stirling.software.SPDF.config.security.oauth2.CustomOAuth2UserService;
-import stirling.software.SPDF.config.security.saml2.CustomSaml2AuthenticationFailureHandler;
-import stirling.software.SPDF.config.security.saml2.CustomSaml2AuthenticationSuccessHandler;
-import stirling.software.SPDF.config.security.saml2.CustomSaml2ResponseAuthenticationConverter;
 import stirling.software.SPDF.config.security.session.SessionPersistentRegistry;
 import stirling.software.SPDF.model.ApplicationProperties;
 import stirling.software.SPDF.model.User;
@@ -61,8 +57,10 @@ public class SecurityConfiguration {
     private final SessionPersistentRegistry sessionRegistry;
     private final PersistentLoginRepository persistentLoginRepository;
     private final GrantedAuthoritiesMapper oAuth2userAuthoritiesMapper;
+
     private final RelyingPartyRegistrationRepository saml2RelyingPartyRegistrations;
-    private final OpenSaml4AuthenticationRequestResolver saml2AuthenticationRequestResolver;
+    private final OpenSaml5AuthenticationRequestResolver saml2AuthenticationRequestResolver;
+    private final OpenSaml5AuthenticationProvider saml2AuthenticationProvider;
 
     public SecurityConfiguration(
             PersistentLoginRepository persistentLoginRepository,
@@ -76,10 +74,9 @@ public class SecurityConfiguration {
             FirstLoginFilter firstLoginFilter,
             SessionPersistentRegistry sessionRegistry,
             @Autowired(required = false) GrantedAuthoritiesMapper oAuth2userAuthoritiesMapper,
-            @Autowired(required = false)
-                    RelyingPartyRegistrationRepository saml2RelyingPartyRegistrations,
-            @Autowired(required = false)
-                    OpenSaml4AuthenticationRequestResolver saml2AuthenticationRequestResolver) {
+            RelyingPartyRegistrationRepository saml2RelyingPartyRegistrations,
+            OpenSaml5AuthenticationRequestResolver saml2AuthenticationRequestResolver,
+            OpenSaml5AuthenticationProvider saml2AuthenticationProvider) {
         this.userDetailsService = userDetailsService;
         this.userService = userService;
         this.loginEnabledValue = loginEnabledValue;
@@ -93,6 +90,7 @@ public class SecurityConfiguration {
         this.oAuth2userAuthoritiesMapper = oAuth2userAuthoritiesMapper;
         this.saml2RelyingPartyRegistrations = saml2RelyingPartyRegistrations;
         this.saml2AuthenticationRequestResolver = saml2AuthenticationRequestResolver;
+        this.saml2AuthenticationProvider = saml2AuthenticationProvider;
     }
 
     @Bean
@@ -256,33 +254,44 @@ public class SecurityConfiguration {
             // Handle SAML
             if (applicationProperties.getSecurity().isSaml2Active() && runningEE) {
                 // Configure the authentication provider
-                OpenSaml4AuthenticationProvider authenticationProvider =
-                        new OpenSaml4AuthenticationProvider();
-                authenticationProvider.setResponseAuthenticationConverter(
-                        new CustomSaml2ResponseAuthenticationConverter(userService));
-                http.authenticationProvider(authenticationProvider)
+                //                OpenSaml4AuthenticationProvider authenticationProvider =
+                //                        new OpenSaml4AuthenticationProvider();
+                //                authenticationProvider.setResponseAuthenticationConverter(
+                //                        new
+                // CustomSaml2ResponseAuthenticationConverter(userService));
+                http
+                        //                http.authenticationProvider(authenticationProvider)
                         .saml2Login(
-                                saml2 -> {
-                                    try {
-                                        saml2.loginPage("/saml2")
-                                                .relyingPartyRegistrationRepository(
-                                                        saml2RelyingPartyRegistrations)
-                                                .authenticationManager(
-                                                        new ProviderManager(authenticationProvider))
-                                                .successHandler(
-                                                        new CustomSaml2AuthenticationSuccessHandler(
-                                                                loginAttemptService,
-                                                                applicationProperties,
-                                                                userService))
-                                                .failureHandler(
-                                                        new CustomSaml2AuthenticationFailureHandler())
-                                                .authenticationRequestResolver(
-                                                        saml2AuthenticationRequestResolver);
-                                    } catch (Exception e) {
-                                        log.error("Error configuring SAML 2 login", e);
-                                        throw new RuntimeException(e);
-                                    }
-                                });
+                        saml2 -> {
+                            try {
+                                saml2.loginPage("/saml2")
+                                        .relyingPartyRegistrationRepository(
+                                                saml2RelyingPartyRegistrations)
+                                        //
+                                        // .authenticationManager(
+                                        //
+                                        // new ProviderManager(authenticationProvider))
+                                        //
+                                        // .successHandler(
+                                        //
+                                        // new CustomSaml2AuthenticationSuccessHandler(
+                                        //
+                                        //      loginAttemptService,
+                                        //
+                                        //      applicationProperties,
+                                        //
+                                        //      userService))
+                                        //
+                                        // .failureHandler(
+                                        //
+                                        // new CustomSaml2AuthenticationFailureHandler())
+                                        .authenticationRequestResolver(
+                                                saml2AuthenticationRequestResolver);
+                            } catch (Exception e) {
+                                log.error("Error configuring SAML 2 login", e);
+                                throw new RuntimeException(e);
+                            }
+                        });
             }
         } else {
             log.debug("SAML 2 login is not enabled. Using default.");

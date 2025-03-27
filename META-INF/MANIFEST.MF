@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Main-Class: org.springframework.boot.loader.launch.PropertiesLauncher
+Start-Class: stirling.software.SPDF.SPDFApplication
+Spring-Boot-Version: 3.4.3
+Spring-Boot-Classes: BOOT-INF/classes/
+Spring-Boot-Lib: BOOT-INF/lib/
+Spring-Boot-Classpath-Index: BOOT-INF/classpath.idx
+Spring-Boot-Layers-Index: BOOT-INF/layers.idx
+Build-Jdk-Spec: 17
+Implementation-Title: Stirling-PDF
+Implementation-Version: 0.43.1
+Class-Path: stirling-pdf-enterprise-0.1.0-all.jar

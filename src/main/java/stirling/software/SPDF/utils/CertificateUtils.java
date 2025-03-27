@@ -1,4 +1,4 @@
-package stirling.software.SPDF.config.security.saml2;
+package stirling.software.SPDF.utils;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;

@@ -65,6 +65,7 @@ enterpriseEdition:
   enabled: false # set to 'true' to enable enterprise edition
   key: 00000000-0000-0000-0000-000000000000
   SSOAutoLogin: false # Enable to auto login to first provided SSO
+  externalConfigLocation: classpath:context.xml
   CustomMetadata:
     autoUpdateMetadata: false # set to 'true' to automatically update metadata with below values
     author: username # supports text such as 'John Doe' or types such as username to autopopulate with user's username

@@ -2,7 +2,13 @@ package stirling.software.SPDF.config.security;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.context.MessageSource;
@@ -23,10 +29,13 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
 import stirling.software.SPDF.config.interfaces.DatabaseInterface;
-import stirling.software.SPDF.config.security.saml2.CustomSaml2AuthenticatedPrincipal;
 import stirling.software.SPDF.config.security.session.SessionPersistentRegistry;
 import stirling.software.SPDF.controller.api.pipeline.UserServiceInterface;
-import stirling.software.SPDF.model.*;
+import stirling.software.SPDF.model.ApplicationProperties;
+import stirling.software.SPDF.model.AuthenticationType;
+import stirling.software.SPDF.model.Authority;
+import stirling.software.SPDF.model.Role;
+import stirling.software.SPDF.model.User;
 import stirling.software.SPDF.model.exception.UnsupportedProviderException;
 import stirling.software.SPDF.repository.AuthorityRepository;
 import stirling.software.SPDF.repository.UserRepository;
@@ -389,8 +398,9 @@ public class UserService implements UserServiceInterface {
                     usernameP = detailsUser.getUsername();
                 } else if (principal instanceof OAuth2User oAuth2User) {
                     usernameP = oAuth2User.getName();
-                } else if (principal instanceof CustomSaml2AuthenticatedPrincipal saml2User) {
-                    usernameP = saml2User.name();
+                    //                } else if (principal instanceof
+                    // CustomSaml2AuthenticatedPrincipal saml2User) {
+                    //                    usernameP = saml2User.name();
                 } else if (principal instanceof String stringUser) {
                     usernameP = stringUser;
                 }
@@ -409,8 +419,8 @@ public class UserService implements UserServiceInterface {
         } else if (principal instanceof OAuth2User oAuth2User) {
             return oAuth2User.getAttribute(
                     applicationProperties.getSecurity().getOauth2().getUseAsUsername());
-        } else if (principal instanceof CustomSaml2AuthenticatedPrincipal saml2User) {
-            return saml2User.name();
+            //        } else if (principal instanceof CustomSaml2AuthenticatedPrincipal saml2User) {
+            //            return saml2User.name();
         } else if (principal instanceof String stringUser) {
             return stringUser;
         }

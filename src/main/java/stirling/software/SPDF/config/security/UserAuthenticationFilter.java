@@ -25,13 +25,11 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import lombok.extern.slf4j.Slf4j;
 
-import stirling.software.SPDF.config.security.saml2.CustomSaml2AuthenticatedPrincipal;
 import stirling.software.SPDF.config.security.session.SessionPersistentRegistry;
 import stirling.software.SPDF.model.ApiKeyAuthenticationToken;
 import stirling.software.SPDF.model.ApplicationProperties;
 import stirling.software.SPDF.model.ApplicationProperties.Security;
 import stirling.software.SPDF.model.ApplicationProperties.Security.OAUTH2;
-import stirling.software.SPDF.model.ApplicationProperties.Security.SAML2;
 import stirling.software.SPDF.model.User;
 
 @Slf4j
@@ -151,11 +149,12 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
                 loginMethod = LoginMethod.OAUTH2USER;
                 OAUTH2 oAuth = securityProp.getOauth2();
                 blockRegistration = oAuth != null && oAuth.getBlockRegistration();
-            } else if (principal instanceof CustomSaml2AuthenticatedPrincipal saml2User) {
-                username = saml2User.name();
-                loginMethod = LoginMethod.SAML2USER;
-                SAML2 saml2 = securityProp.getSaml2();
-                blockRegistration = saml2 != null && saml2.getBlockRegistration();
+                //            } else if (principal instanceof CustomSaml2AuthenticatedPrincipal
+                // saml2User) {
+                //                username = saml2User.name();
+                //                loginMethod = LoginMethod.SAML2USER;
+                //                SAML2 saml2 = securityProp.getSaml2();
+                //                blockRegistration = saml2 != null && saml2.getBlockRegistration();
             } else if (principal instanceof String stringUser) {
                 username = stringUser;
                 loginMethod = LoginMethod.STRINGUSER;

@@ -1,7 +1,12 @@
 package stirling.software.SPDF.config.security.session;
 
 import java.time.Duration;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.session.SessionInformation;
@@ -12,7 +17,6 @@ import org.springframework.stereotype.Component;
 
 import jakarta.transaction.Transactional;
 
-import stirling.software.SPDF.config.security.saml2.CustomSaml2AuthenticatedPrincipal;
 import stirling.software.SPDF.model.SessionEntity;
 
 @Component
@@ -46,9 +50,9 @@ public class SessionPersistentRegistry implements SessionRegistry {
         if (principal instanceof UserDetails detailsUser) {
             principalName = detailsUser.getUsername();
         } else if (principal instanceof OAuth2User oAuth2User) {
-            principalName = oAuth2User.getName();
-        } else if (principal instanceof CustomSaml2AuthenticatedPrincipal saml2User) {
-            principalName = saml2User.name();
+            //            principalName = oAuth2User.getName();
+            //        } else if (principal instanceof CustomSaml2AuthenticatedPrincipal saml2User) {
+            //            principalName = saml2User.name();
         } else if (principal instanceof String stringUser) {
             principalName = stringUser;
         }
@@ -78,8 +82,8 @@ public class SessionPersistentRegistry implements SessionRegistry {
             principalName = detailsUser.getUsername();
         } else if (principal instanceof OAuth2User oAuth2User) {
             principalName = oAuth2User.getName();
-        } else if (principal instanceof CustomSaml2AuthenticatedPrincipal saml2User) {
-            principalName = saml2User.name();
+            //        } else if (principal instanceof CustomSaml2AuthenticatedPrincipal saml2User) {
+            //            principalName = saml2User.name();
         } else if (principal instanceof String stringUser) {
             principalName = stringUser;
         }

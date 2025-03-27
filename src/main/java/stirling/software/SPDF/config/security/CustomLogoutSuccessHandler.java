@@ -13,22 +13,17 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import org.springframework.security.saml2.provider.service.authentication.Saml2Authentication;
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 
-import com.coveo.saml.SamlClient;
-import com.coveo.saml.SamlException;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import stirling.software.SPDF.SPDFApplication;
-import stirling.software.SPDF.config.security.saml2.CertificateUtils;
-import stirling.software.SPDF.config.security.saml2.CustomSaml2AuthenticatedPrincipal;
 import stirling.software.SPDF.model.ApplicationProperties;
 import stirling.software.SPDF.model.ApplicationProperties.Security.OAUTH2;
 import stirling.software.SPDF.model.ApplicationProperties.Security.SAML2;
 import stirling.software.SPDF.model.provider.KeycloakProvider;
+import stirling.software.SPDF.utils.CertificateUtils;
 import stirling.software.SPDF.utils.UrlUtils;
 
 @Slf4j
@@ -79,10 +74,12 @@ public class CustomLogoutSuccessHandler extends SimpleUrlLogoutSuccessHandler {
         SAML2 samlConf = applicationProperties.getSecurity().getSaml2();
         String registrationId = samlConf.getRegistrationId();
 
-        CustomSaml2AuthenticatedPrincipal principal =
-                (CustomSaml2AuthenticatedPrincipal) samlAuthentication.getPrincipal();
+        //        CustomSaml2AuthenticatedPrincipal principal =
+        //                (CustomSaml2AuthenticatedPrincipal) samlAuthentication.getPrincipal();
+        Object principal = samlAuthentication.getPrincipal();
 
-        String nameIdValue = principal.name();
+        String nameIdValue = principal.toString();
+        //        String nameIdValue = principal.name();
 
         try {
             // Read certificate from the resource
@@ -93,17 +90,18 @@ public class CustomLogoutSuccessHandler extends SimpleUrlLogoutSuccessHandler {
             certificates.add(certificate);
 
             // Construct URLs required for SAML configuration
-            SamlClient samlClient = getSamlClient(registrationId, samlConf, certificates);
+            //            SamlClient samlClient = getSamlClient(registrationId, samlConf,
+            // certificates);
 
             // Read private key for service provider
             Resource privateKeyResource = samlConf.getPrivateKey();
             RSAPrivateKey privateKey = CertificateUtils.readPrivateKey(privateKeyResource);
 
             // Set service provider keys for the SamlClient
-            samlClient.setSPKeys(certificate, privateKey);
+            //            samlClient.setSPKeys(certificate, privateKey);
 
             // Redirect to identity provider for logout
-            samlClient.redirectToIdentityProvider(response, null, nameIdValue);
+            //            samlClient.redirectToIdentityProvider(response, null, nameIdValue);
         } catch (Exception e) {
             log.error(
                     "Error retrieving logout URL from Provider {} for user {}",
@@ -172,30 +170,30 @@ public class CustomLogoutSuccessHandler extends SimpleUrlLogoutSuccessHandler {
         }
     }
 
-    private static SamlClient getSamlClient(
-            String registrationId, SAML2 samlConf, List<X509Certificate> certificates)
-            throws SamlException {
-        String serverUrl =
-                SPDFApplication.getStaticBaseUrl() + ":" + SPDFApplication.getStaticPort();
-
-        String relyingPartyIdentifier =
-                serverUrl + "/saml2/service-provider-metadata/" + registrationId;
-
-        String assertionConsumerServiceUrl = serverUrl + "/login/saml2/sso/" + registrationId;
-
-        String idpSLOUrl = samlConf.getIdpSingleLogoutUrl();
-
-        String idpIssuer = samlConf.getIdpIssuer();
-
-        // Create SamlClient instance for SAML logout
-        return new SamlClient(
-                relyingPartyIdentifier,
-                assertionConsumerServiceUrl,
-                idpSLOUrl,
-                idpIssuer,
-                certificates,
-                SamlClient.SamlIdpBinding.POST);
-    }
+    //    private static SamlClient getSamlClient(
+    //            String registrationId, SAML2 samlConf, List<X509Certificate> certificates)
+    //            throws SamlException {
+    //        String serverUrl =
+    //                SPDFApplication.getStaticBaseUrl() + ":" + SPDFApplication.getStaticPort();
+    //
+    //        String relyingPartyIdentifier =
+    //                serverUrl + "/saml2/service-provider-metadata/" + registrationId;
+    //
+    //        String assertionConsumerServiceUrl = serverUrl + "/login/saml2/sso/" + registrationId;
+    //
+    //        String idpSLOUrl = samlConf.getIdpSingleLogoutUrl();
+    //
+    //        String idpIssuer = samlConf.getIdpIssuer();
+    //
+    //        // Create SamlClient instance for SAML logout
+    //        return new SamlClient(
+    //                relyingPartyIdentifier,
+    //                assertionConsumerServiceUrl,
+    //                idpSLOUrl,
+    //                idpIssuer,
+    //                certificates,
+    //                SamlClient.SamlIdpBinding.POST);
+    //    }
 
     /**
      * Handles different error scenarios during logout. Will return a <code>String</code> containing

@@ -14,10 +14,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PostHogConfig {
 
-    @Value("${posthog.api.key}")
+    @Value("${posthog.api.key:phc_fiR65u5j6qmXTYL56MNrLZSWqLaDW74OrZH0Insd2xq}")
     private String posthogApiKey;
 
-    @Value("${posthog.host}")
+    @Value("${posthog.host:https://eu.i.posthog.com}")
     private String posthogHost;
 
     private PostHog postHogClient;

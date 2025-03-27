@@ -30,7 +30,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 
 import stirling.software.SPDF.config.security.UserService;
-import stirling.software.SPDF.config.security.saml2.CustomSaml2AuthenticatedPrincipal;
 import stirling.software.SPDF.config.security.session.SessionPersistentRegistry;
 import stirling.software.SPDF.model.AuthenticationType;
 import stirling.software.SPDF.model.Role;
@@ -301,8 +300,9 @@ public class UserController {
                     userNameP = detailsUser.getUsername();
                 } else if (principal instanceof OAuth2User oAuth2User) {
                     userNameP = oAuth2User.getName();
-                } else if (principal instanceof CustomSaml2AuthenticatedPrincipal saml2User) {
-                    userNameP = saml2User.name();
+                    //                } else if (principal instanceof
+                    // CustomSaml2AuthenticatedPrincipal saml2User) {
+                    //                    userNameP = saml2User.name();
                 } else if (principal instanceof String stringUser) {
                     userNameP = stringUser;
                 }

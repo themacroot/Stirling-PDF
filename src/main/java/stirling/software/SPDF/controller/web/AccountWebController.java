@@ -29,7 +29,6 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import lombok.extern.slf4j.Slf4j;
 
-import stirling.software.SPDF.config.security.saml2.CustomSaml2AuthenticatedPrincipal;
 import stirling.software.SPDF.config.security.session.SessionPersistentRegistry;
 import stirling.software.SPDF.model.ApplicationProperties;
 import stirling.software.SPDF.model.ApplicationProperties.Security;
@@ -340,10 +339,10 @@ public class AccountWebController {
                 username = oAuth2User.getName();
                 model.addAttribute("oAuth2Login", true);
             }
-            if (principal instanceof CustomSaml2AuthenticatedPrincipal saml2User) {
-                username = saml2User.name();
-                model.addAttribute("saml2Login", true);
-            }
+            //            if (principal instanceof CustomSaml2AuthenticatedPrincipal saml2User) {
+            //                username = saml2User.name();
+            //                model.addAttribute("saml2Login", true);
+            //            }
             if (username != null) {
                 // Fetch user details from the database
                 Optional<User> user = userRepository.findByUsernameIgnoreCaseWithSettings(username);
