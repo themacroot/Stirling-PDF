@@ -108,6 +108,7 @@ public class ApplicationProperties {
         private InitialLogin initialLogin = new InitialLogin();
         private OAUTH2 oauth2 = new OAUTH2();
         private SAML2 saml2 = new SAML2();
+        private LDAP ldap = new LDAP();
         private int loginAttemptCount;
         private long loginResetTimeMinutes;
         private String loginMethod = "all";
@@ -218,6 +219,25 @@ public class ApplicationProperties {
             }
         }
 
+        @Data
+        @ToString
+        public static class LDAP {
+            private Boolean enabled = false;
+            private String url;
+            private String baseDn;
+            private String userDnPattern;
+            private String groupSearchBase;
+            private String managerDn;
+            @ToString.Exclude private String managerPassword;
+
+            public boolean isSettingsValid() {
+                return enabled
+                        && !isStringEmpty(url)
+                        && !isStringEmpty(baseDn)
+                        && !isStringEmpty(userDnPattern);
+            }
+        }
+        
         @Data
         public static class OAUTH2 {
             private Boolean enabled = false;

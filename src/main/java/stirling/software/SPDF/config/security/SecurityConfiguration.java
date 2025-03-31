@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -63,7 +64,8 @@ public class SecurityConfiguration {
     private final GrantedAuthoritiesMapper oAuth2userAuthoritiesMapper;
     private final RelyingPartyRegistrationRepository saml2RelyingPartyRegistrations;
     private final OpenSaml4AuthenticationRequestResolver saml2AuthenticationRequestResolver;
-
+    private final AuthenticationProvider ldapAuthenticationProvider;
+    
     public SecurityConfiguration(
             PersistentLoginRepository persistentLoginRepository,
             CustomUserDetailsService userDetailsService,
@@ -79,7 +81,7 @@ public class SecurityConfiguration {
             @Autowired(required = false)
                     RelyingPartyRegistrationRepository saml2RelyingPartyRegistrations,
             @Autowired(required = false)
-                    OpenSaml4AuthenticationRequestResolver saml2AuthenticationRequestResolver) {
+                    OpenSaml4AuthenticationRequestResolver saml2AuthenticationRequestResolver, @Autowired(required = false) AuthenticationProvider  ldapAuthenticationProvider) {
         this.userDetailsService = userDetailsService;
         this.userService = userService;
         this.loginEnabledValue = loginEnabledValue;
@@ -93,6 +95,7 @@ public class SecurityConfiguration {
         this.oAuth2userAuthoritiesMapper = oAuth2userAuthoritiesMapper;
         this.saml2RelyingPartyRegistrations = saml2RelyingPartyRegistrations;
         this.saml2AuthenticationRequestResolver = saml2AuthenticationRequestResolver;
+        this.ldapAuthenticationProvider = ldapAuthenticationProvider;
     }
 
     @Bean
@@ -284,10 +287,20 @@ public class SecurityConfiguration {
                                     }
                                 });
             }
+            
+            
         } else {
             log.debug("SAML 2 login is not enabled. Using default.");
             http.authorizeHttpRequests(authz -> authz.anyRequest().permitAll());
         }
+        
+        if (applicationProperties.getSecurity().getLdap().getEnabled()) {
+            if (ldapAuthenticationProvider != null) {
+                http.authenticationProvider(ldapAuthenticationProvider);
+            }
+        }
+        
+        
         return http.build();
     }
 

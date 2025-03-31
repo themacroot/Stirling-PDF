@@ -397,6 +397,9 @@ dependencies {
 
     if (System.getenv("DOCKER_ENABLE_SECURITY") != "false") {
 
+		implementation 'org.springframework.security:spring-security-ldap'
+   		implementation 'org.springframework.ldap:spring-ldap-core'
+    
 	    implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	    implementation 'io.micrometer:micrometer-registry-prometheus'
 

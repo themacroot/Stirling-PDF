@@ -60,7 +60,14 @@ security:
     idpCert: classpath:okta.cert # The certificate your Provider will use to authenticate your app's SAML authentication requests. Provided by your Provider
     privateKey: classpath:saml-private-key.key # Your private key. Generated from your keypair
     spCert: classpath:saml-public-cert.crt # Your signing certificate. Generated from your keypair
-
+  ldap:
+    enabled: true
+    url: ldap://your-ldap-server:389
+    base-dn: dc=example,dc=com
+    user-dn-pattern: uid={0},ou=people
+    group-search-base: ou=groups
+    manager-dn: cn=admin,dc=example,dc=com  # If needed
+    manager-password: admin-password        # If needed
 
 premium:
   key: 00000000-0000-0000-0000-000000000000
@@ -70,9 +77,10 @@ premium:
     CustomMetadata:
       autoUpdateMetadata: false
       author: username
-      creator: Stirling-PDF
-      producer: Stirling-PDF
-
+      creator: Team1
+      producer: 
+      
+      
 legal:
   termsAndConditions: https://www.stirlingpdf.com/terms-and-conditions # URL to the terms and conditions of your application (e.g. https://example.com/terms). Empty string to disable or filename to load from local file in static folder
   privacyPolicy: https://www.stirlingpdf.com/privacy-policy # URL to the privacy policy of your application (e.g. https://example.com/privacy). Empty string to disable or filename to load from local file in static folder

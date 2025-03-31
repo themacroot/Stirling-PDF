@@ -43,6 +43,7 @@ public class EEAppConfig {
         return applicationProperties.getPremium().getProFeatures().isSsoAutoLogin();
     }
 
+    
     // TODO: Remove post migration
     public void migrateEnterpriseSettingsToPremium(ApplicationProperties applicationProperties) {
         EnterpriseEdition enterpriseEdition = applicationProperties.getEnterpriseEdition();
