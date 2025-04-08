@@ -43,7 +43,12 @@ ENV DOCKER_ENABLE_SECURITY=false \
     PYTHONPATH=/usr/lib/libreoffice/program:/opt/venv/lib/python3.12/site-packages \
     UNO_PATH=/usr/lib/libreoffice/program \
     URE_BOOTSTRAP=file:///usr/lib/libreoffice/program/fundamentalrc \
-    PATH=$PATH:/opt/venv/bin
+    PATH=$PATH:/opt/venv/bin \
+    LIBREOFFICE_HOME=/usr/lib/libreoffice \
+    SAL_USE_VCLPLUGIN=svp \
+    OOO_FORCE_DESKTOP=headless \
+    DISPLAY=:99 \
+    LD_LIBRARY_PATH=/usr/lib/libreoffice/program
 
 
 # JDK for app
@@ -53,6 +58,11 @@ RUN echo "@main https://dl-cdn.alpinelinux.org/alpine/edge/main" | tee -a /etc/a
     apk upgrade --no-cache -a && \
     apk add --no-cache \
     ca-certificates \
+    libxcb libx11 libxtst libxi \
+     xvfb-run \
+        dbus \
+    cairo \
+    mesa-dri-gallium \
     tzdata \
     tini \
     bash \
@@ -101,4 +111,4 @@ RUN echo "@main https://dl-cdn.alpinelinux.org/alpine/edge/main" | tee -a /etc/a
 EXPOSE 8080/tcp
 # Set user and run command
 ENTRYPOINT ["tini", "--", "/scripts/init.sh"]
-CMD ["sh", "-c", "java -Dfile.encoding=UTF-8 -jar /app.jar & /opt/venv/bin/unoserver --port 2003 --interface 0.0.0.0"]
+CMD ["sh", "-c", "java -Dfile.encoding=UTF-8 -jar /app.jar & /opt/venv/bin/unoserver --port 2003 --interface 127.0.0.1"]
