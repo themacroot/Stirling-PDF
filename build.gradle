@@ -50,7 +50,6 @@ licenseReport {
 sourceSets {
     main {
         java {
-            
                 exclude "stirling/software/SPDF/config/security/**"
                 exclude "stirling/software/SPDF/controller/api/DatabaseController.java"
                 exclude "stirling/software/SPDF/controller/api/UserController.java"
@@ -65,7 +64,7 @@ sourceSets {
                 exclude "stirling/software/SPDF/model/SessionEntity.java"
                 exclude "stirling/software/SPDF/model/User.java"
                 exclude "stirling/software/SPDF/repository/**"
-            
+
 
             if (System.getenv("STIRLING_PDF_DESKTOP_UI") == "false") {
                 exclude "stirling/software/SPDF/UI/impl/**"
@@ -537,17 +536,18 @@ bootJar {
      manifest {
         attributes(
             'Main-Class': 'org.springframework.boot.loader.launch.PropertiesLauncher',
-            'Start-Class': 'stirling.software.SPDF.SPDFApplication' 
+            'Start-Class': 'stirling.software.SPDF.SPDFApplication'
         )
     }
 }
 
 jar {
     enabled = true
-    archiveClassifier.set('')
     manifest {
         attributes "Implementation-Title": "Stirling-PDF",
-                   "Implementation-Version": project.version
+                   "Implementation-Version": project.version,
+                   'Main-Class': 'org.springframework.boot.loader.launch.PropertiesLauncher',
+                   'Start-Class': 'stirling.software.SPDF.SPDFApplication'
     }
 }
 
