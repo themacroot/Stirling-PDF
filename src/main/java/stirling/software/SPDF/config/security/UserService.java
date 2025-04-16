@@ -12,6 +12,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -53,7 +54,7 @@ public class UserService implements UserServiceInterface {
 
     private final SessionPersistentRegistry sessionRegistry;
 
-    private final DatabaseInterface databaseService;
+    @Lazy private final DatabaseInterface databaseService;
 
     private final ApplicationProperties.Security.OAUTH2 oAuth2;
 
