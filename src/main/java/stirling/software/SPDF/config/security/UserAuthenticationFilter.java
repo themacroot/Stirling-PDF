@@ -35,7 +35,6 @@ import stirling.software.common.model.ApplicationProperties.Security.SAML2;
 
 @Slf4j
 @Component
-@ConditionalOnProperty(name = "premium.enabled", havingValue = "true")
 public class UserAuthenticationFilter extends OncePerRequestFilter {
 
     private final ApplicationProperties.Security securityProp;

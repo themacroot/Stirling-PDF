@@ -20,7 +20,7 @@ import stirling.software.common.model.exception.UnsupportedProviderException;
 @RequiredArgsConstructor
 public class InitialSecuritySetup {
 
-    private final UserService userService;
+    @Lazy private final UserService userService;
 
     private final ApplicationProperties applicationProperties;
 

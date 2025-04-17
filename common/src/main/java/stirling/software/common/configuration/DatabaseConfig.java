@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import stirling.software.common.model.ApplicationProperties;
 import stirling.software.common.model.exception.UnsupportedProviderException;
 
+@Lazy
 @Slf4j
 @Getter
 @Configuration

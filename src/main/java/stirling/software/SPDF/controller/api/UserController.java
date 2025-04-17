@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -48,8 +49,8 @@ import stirling.software.common.model.exception.UnsupportedProviderException;
 public class UserController {
 
     private static final String LOGIN_MESSAGETYPE_CREDSUPDATED = "/login?messageType=credsUpdated";
-    private final UserService userService;
-    private final SessionPersistentRegistry sessionRegistry;
+    @Lazy private final UserService userService;
+    @Lazy private final SessionPersistentRegistry sessionRegistry;
     private final ApplicationProperties applicationProperties;
 
     @PreAuthorize("!hasAuthority('ROLE_DEMO_USER')")
