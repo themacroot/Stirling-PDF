@@ -13,9 +13,9 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 
 import lombok.extern.slf4j.Slf4j;
 
-import stirling.software.SPDF.model.ApplicationProperties;
-import stirling.software.SPDF.model.ApplicationProperties.Security.OAUTH2;
+import stirling.software.spdf.proprietary.security.configuration.ApplicationPropertiesConfiguration;
 import stirling.software.spdf.proprietary.security.model.enumeration.UsernameAttribute;
+import stirling.software.spdf.proprietary.security.persistence.User;
 import stirling.software.spdf.proprietary.security.service.LoginAttemptService;
 import stirling.software.spdf.proprietary.security.service.UserService;
 
@@ -28,10 +28,10 @@ public class CustomOAuth2UserService implements OAuth2UserService<OidcUserReques
 
     private final LoginAttemptService loginAttemptService;
 
-    private final ApplicationProperties applicationProperties;
+    private final ApplicationPropertiesConfiguration applicationProperties;
 
     public CustomOAuth2UserService(
-            ApplicationProperties applicationProperties,
+            ApplicationPropertiesConfiguration applicationProperties,
             UserService userService,
             LoginAttemptService loginAttemptService) {
         this.applicationProperties = applicationProperties;
@@ -43,7 +43,8 @@ public class CustomOAuth2UserService implements OAuth2UserService<OidcUserReques
     public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
         try {
             OidcUser user = delegate.loadUser(userRequest);
-            OAUTH2 oauth2 = applicationProperties.getSecurity().getOauth2();
+            ApplicationPropertiesConfiguration.Security.OAUTH2 oauth2 =
+                    applicationProperties.getSecurity().getOauth2();
             UsernameAttribute usernameAttribute =
                     UsernameAttribute.valueOf(oauth2.getUseAsUsername().toUpperCase());
             String usernameAttributeKey = usernameAttribute.getName();

@@ -16,8 +16,7 @@ import jakarta.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import stirling.software.SPDF.model.ApplicationProperties;
-import stirling.software.SPDF.model.ApplicationProperties.Security.SAML2;
+import stirling.software.spdf.proprietary.security.configuration.ApplicationPropertiesConfiguration;
 import stirling.software.spdf.proprietary.security.model.enumeration.AuthenticationType;
 import stirling.software.spdf.proprietary.security.model.exception.UnsupportedProviderException;
 import stirling.software.spdf.proprietary.security.service.LoginAttemptService;
@@ -30,7 +29,7 @@ public class CustomSaml2AuthenticationSuccessHandler
         extends SavedRequestAwareAuthenticationSuccessHandler {
 
     private LoginAttemptService loginAttemptService;
-    private ApplicationProperties applicationProperties;
+    private ApplicationPropertiesConfiguration applicationProperties;
     private UserService userService;
 
     @Override
@@ -65,7 +64,8 @@ public class CustomSaml2AuthenticationSuccessHandler
                         savedRequest.getRedirectUrl());
                 super.onAuthenticationSuccess(request, response, authentication);
             } else {
-                SAML2 saml2 = applicationProperties.getSecurity().getSaml2();
+                ApplicationPropertiesConfiguration.Security.SAML2 saml2 =
+                        applicationProperties.getSecurity().getSaml2();
                 log.debug(
                         "Processing SAML2 authentication with autoCreateUser: {}",
                         saml2.getAutoCreateUser());

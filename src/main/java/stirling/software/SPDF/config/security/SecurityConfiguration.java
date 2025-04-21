@@ -65,7 +65,7 @@ public class SecurityConfiguration {
     private final OpenSaml4AuthenticationRequestResolver saml2AuthenticationRequestResolver;
 
     public SecurityConfiguration(
-            PersistentLoginRepository persistentLoginRepository,
+            @Lazy @Autowired(required = false) PersistentLoginRepository persistentLoginRepository,
             CustomUserDetailsService userDetailsService,
             @Lazy UserService userService,
             @Qualifier("loginEnabled") boolean loginEnabledValue,
@@ -74,7 +74,7 @@ public class SecurityConfiguration {
             UserAuthenticationFilter userAuthenticationFilter,
             LoginAttemptService loginAttemptService,
             FirstLoginFilter firstLoginFilter,
-            SessionPersistentRegistry sessionRegistry,
+            @Lazy @Autowired(required = false) SessionPersistentRegistry sessionRegistry,
             @Autowired(required = false) GrantedAuthoritiesMapper oAuth2userAuthoritiesMapper,
             @Autowired(required = false)
                     RelyingPartyRegistrationRepository saml2RelyingPartyRegistrations,

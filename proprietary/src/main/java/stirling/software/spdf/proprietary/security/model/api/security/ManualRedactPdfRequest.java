@@ -7,8 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import stirling.software.SPDF.model.api.PDFWithPageNums;
-import stirling.software.SPDF.model.api.security.RedactionArea;
+import stirling.software.spdf.proprietary.security.model.api.PDFWithPageNums;
 
 @Data
 @EqualsAndHashCode(callSuper = true)

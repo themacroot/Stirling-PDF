@@ -13,7 +13,6 @@ import stirling.software.common.model.exception.UnsupportedProviderException;
 @Lazy
 @Slf4j
 @Getter
-@Lazy
 @Configuration
 public class DatabaseConfig {
 

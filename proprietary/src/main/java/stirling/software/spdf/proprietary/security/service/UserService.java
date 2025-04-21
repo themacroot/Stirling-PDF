@@ -28,9 +28,9 @@ import jakarta.transaction.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
 
-import stirling.software.SPDF.model.ApplicationProperties;
 import stirling.software.spdf.proprietary.security.DatabaseInterface;
 import stirling.software.spdf.proprietary.security.UserServiceInterface;
+import stirling.software.spdf.proprietary.security.configuration.ApplicationPropertiesConfiguration;
 import stirling.software.spdf.proprietary.security.model.Authority;
 import stirling.software.spdf.proprietary.security.model.enumeration.AuthenticationType;
 import stirling.software.spdf.proprietary.security.model.enumeration.Role;
@@ -57,7 +57,7 @@ public class UserService implements UserServiceInterface {
 
     private final DatabaseInterface databaseService;
 
-    private final ApplicationProperties applicationProperties;
+    private final ApplicationPropertiesConfiguration applicationProperties;
 
     public UserService(
             UserRepository userRepository,
@@ -66,7 +66,7 @@ public class UserService implements UserServiceInterface {
             MessageSource messageSource,
             SessionPersistentRegistry sessionRegistry,
             DatabaseInterface databaseService,
-            ApplicationProperties applicationProperties) {
+            ApplicationPropertiesConfiguration applicationProperties) {
         this.userRepository = userRepository;
         this.authorityRepository = authorityRepository;
         this.passwordEncoder = passwordEncoder;

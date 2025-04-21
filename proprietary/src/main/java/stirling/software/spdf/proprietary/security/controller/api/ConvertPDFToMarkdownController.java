@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import stirling.software.spdf.proprietary.security.model.api.PDFFile;
+import stirling.software.spdf.proprietary.security.util.PDFToFileUtil;
 
 @RestController
 @Tag(name = "Convert", description = "Convert APIs")
@@ -25,7 +26,7 @@ public class ConvertPDFToMarkdownController {
     public ResponseEntity<byte[]> processPdfToMarkdown(@ModelAttribute PDFFile request)
             throws Exception {
         MultipartFile inputFile = request.getFileInput();
-        PDFToFile pdfToFile = new PDFToFile();
+        PDFToFileUtil pdfToFile = new PDFToFileUtil();
         return pdfToFile.processPdfToMarkdown(inputFile);
     }
 }

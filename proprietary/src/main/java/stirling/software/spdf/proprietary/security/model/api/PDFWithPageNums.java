@@ -13,8 +13,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import stirling.software.SPDF.model.api.PDFFile;
-import stirling.software.SPDF.utils.GeneralUtils;
+import stirling.software.spdf.proprietary.security.util.GeneralUtil;
 
 @Data
 @NoArgsConstructor
@@ -35,6 +34,6 @@ public class PDFWithPageNums extends PDFFile {
     public List<Integer> getPageNumbersList(PDDocument doc, boolean oneBased) {
         int pageCount = 0;
         pageCount = doc.getNumberOfPages();
-        return GeneralUtils.parsePageList(pageNumbers, pageCount, oneBased);
+        return GeneralUtil.parsePageList(pageNumbers, pageCount, oneBased);
     }
 }

@@ -15,23 +15,23 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
-import stirling.software.SPDF.model.ApplicationProperties;
-import stirling.software.SPDF.model.ApplicationProperties.Security.OAUTH2;
+import stirling.software.spdf.proprietary.security.configuration.ApplicationPropertiesConfiguration;
 import stirling.software.spdf.proprietary.security.model.enumeration.AuthenticationType;
 import stirling.software.spdf.proprietary.security.model.exception.UnsupportedProviderException;
 import stirling.software.spdf.proprietary.security.service.LoginAttemptService;
 import stirling.software.spdf.proprietary.security.service.UserService;
+import stirling.software.spdf.proprietary.security.util.RequestUriUtil;
 
 public class CustomOAuth2AuthenticationSuccessHandler
         extends SavedRequestAwareAuthenticationSuccessHandler {
 
     private final LoginAttemptService loginAttemptService;
-    private final ApplicationProperties applicationProperties;
+    private final ApplicationPropertiesConfiguration applicationProperties;
     private final UserService userService;
 
     public CustomOAuth2AuthenticationSuccessHandler(
             LoginAttemptService loginAttemptService,
-            ApplicationProperties applicationProperties,
+            ApplicationPropertiesConfiguration applicationProperties,
             UserService userService) {
         this.applicationProperties = applicationProperties;
         this.userService = userService;
@@ -65,7 +65,8 @@ public class CustomOAuth2AuthenticationSuccessHandler
             // Redirect to the original destination
             super.onAuthenticationSuccess(request, response, authentication);
         } else {
-            OAUTH2 oAuth = applicationProperties.getSecurity().getOauth2();
+            ApplicationPropertiesConfiguration.Security.OAUTH2 oAuth =
+                    applicationProperties.getSecurity().getOauth2();
 
             if (loginAttemptService.isBlocked(username)) {
                 if (session != null) {

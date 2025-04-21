@@ -5,8 +5,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import stirling.software.SPDF.model.api.PDFWithImageFormatRequest;
-
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class PDFExtractImagesRequest extends PDFWithImageFormatRequest {

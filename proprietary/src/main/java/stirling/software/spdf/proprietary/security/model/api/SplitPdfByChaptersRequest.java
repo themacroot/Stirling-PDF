@@ -6,8 +6,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import stirling.software.SPDF.model.api.PDFFile;
-
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)

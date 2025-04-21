@@ -10,8 +10,6 @@ import org.springframework.context.annotation.Configuration;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-import stirling.software.SPDF.config.InstallationPathConfig;
-import stirling.software.SPDF.model.ApplicationProperties;
 import stirling.software.spdf.proprietary.security.model.exception.UnsupportedProviderException;
 
 @Slf4j
@@ -26,15 +24,15 @@ public class DatabaseConfiguration {
     public static final String DEFAULT_USERNAME = "sa";
     public static final String POSTGRES_DRIVER = "org.postgresql.Driver";
 
-    private final ApplicationProperties applicationProperties;
+    private final ApplicationPropertiesConfiguration applicationProperties;
     private final boolean runningProOrHigher;
 
     public DatabaseConfiguration(
-            ApplicationProperties applicationProperties,
+            ApplicationPropertiesConfiguration applicationProperties,
             @Qualifier("runningProOrHigher") boolean runningProOrHigher) {
         DATASOURCE_DEFAULT_URL =
                 "jdbc:h2:file:"
-                        + InstallationPathConfig.getConfigPath()
+                        + InstallationPathConfiguration.getConfigPath()
                         + "stirling-pdf-DB-2.3.232;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE";
         log.debug("Database URL: {}", DATASOURCE_DEFAULT_URL);
         this.applicationProperties = applicationProperties;
@@ -58,8 +56,8 @@ public class DatabaseConfiguration {
             return useDefaultDataSource(dataSourceBuilder);
         }
 
-        ApplicationProperties.System system = applicationProperties.getSystem();
-        ApplicationProperties.Datasource datasource = system.getDatasource();
+        ApplicationPropertiesConfiguration.System system = applicationProperties.getSystem();
+        ApplicationPropertiesConfiguration.Datasource datasource = system.getDatasource();
 
         if (!datasource.isEnableCustomDatabase()) {
             return useDefaultDataSource(dataSourceBuilder);
@@ -120,8 +118,8 @@ public class DatabaseConfiguration {
      */
     private String getDriverClassName(String driverName) throws UnsupportedProviderException {
         try {
-            ApplicationProperties.Driver driver =
-                    ApplicationProperties.Driver.valueOf(driverName.toUpperCase());
+            ApplicationPropertiesConfiguration.Driver driver =
+                    ApplicationPropertiesConfiguration.Driver.valueOf(driverName.toUpperCase());
 
             switch (driver) {
                 case H2 -> {

@@ -1,8 +1,10 @@
 package stirling.software.spdf.proprietary.security.model.api.general;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
 import stirling.software.spdf.proprietary.security.model.api.PDFWithPageNums;
 import stirling.software.spdf.proprietary.security.model.enumeration.SortTypes;
 

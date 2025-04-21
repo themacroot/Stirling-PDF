@@ -27,9 +27,9 @@ import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
 
-import stirling.software.SPDF.config.InstallationPathConfig;
-import stirling.software.SPDF.model.ApplicationProperties;
 import stirling.software.spdf.proprietary.security.DatabaseInterface;
+import stirling.software.spdf.proprietary.security.configuration.ApplicationPropertiesConfiguration;
+import stirling.software.spdf.proprietary.security.configuration.InstallationPathConfiguration;
 import stirling.software.spdf.proprietary.security.model.FileInfo;
 import stirling.software.spdf.proprietary.security.model.exception.BackupNotFoundException;
 
@@ -41,12 +41,14 @@ public class DatabaseService implements DatabaseInterface {
     public static final String SQL_SUFFIX = ".sql";
     private final Path BACKUP_DIR;
 
-    private final ApplicationProperties applicationProperties;
+    private final ApplicationPropertiesConfiguration applicationProperties;
     private final DataSource dataSource;
 
-    public DatabaseService(ApplicationProperties applicationProperties, DataSource dataSource) {
+    public DatabaseService(
+            ApplicationPropertiesConfiguration applicationProperties, DataSource dataSource) {
         this.BACKUP_DIR =
-                Paths.get(InstallationPathConfig.getConfigPath(), "db", "backup").normalize();
+                Paths.get(InstallationPathConfiguration.getConfigPath(), "db", "backup")
+                        .normalize();
         this.applicationProperties = applicationProperties;
         this.dataSource = dataSource;
     }
@@ -238,10 +240,12 @@ public class DatabaseService implements DatabaseInterface {
     }
 
     private boolean isH2Database() {
-        ApplicationProperties.Datasource datasource =
+        ApplicationPropertiesConfiguration.Datasource datasource =
                 applicationProperties.getSystem().getDatasource();
         return !datasource.isEnableCustomDatabase()
-                || datasource.getType().equalsIgnoreCase(ApplicationProperties.Driver.H2.name());
+                || datasource
+                        .getType()
+                        .equalsIgnoreCase(ApplicationPropertiesConfiguration.Driver.H2.name());
     }
 
     /**

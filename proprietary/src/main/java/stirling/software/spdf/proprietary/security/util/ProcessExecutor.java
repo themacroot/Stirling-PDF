@@ -20,27 +20,26 @@ import lombok.extern.slf4j.Slf4j;
 import stirling.software.spdf.proprietary.security.configuration.ApplicationPropertiesConfiguration;
 
 @Slf4j
-public class ProcessExecutorUtil {
+public class ProcessExecutor {
 
-    private static final Map<Processes, ApplicationPropertiesConfiguration.ProcessExecutor>
-            instances = new ConcurrentHashMap<>();
+    private static final Map<Processes, ProcessExecutor> instances = new ConcurrentHashMap<>();
     private static ApplicationPropertiesConfiguration applicationProperties =
             new ApplicationPropertiesConfiguration();
     private final Semaphore semaphore;
     private final boolean liveUpdates;
     private long timeoutDuration;
 
-    private ProcessExecutorUtil(int semaphoreLimit, boolean liveUpdates, long timeout) {
+    private ProcessExecutor(int semaphoreLimit, boolean liveUpdates, long timeout) {
         this.semaphore = new Semaphore(semaphoreLimit);
         this.liveUpdates = liveUpdates;
         this.timeoutDuration = timeout;
     }
 
-    public static ProcessExecutorUtil getInstance(Processes processType) {
+    public static ProcessExecutor getInstance(Processes processType) {
         return getInstance(processType, true);
     }
 
-    public static ProcessExecutorUtil getInstance(Processes processType, boolean liveUpdates) {
+    public static ProcessExecutor getInstance(Processes processType, boolean liveUpdates) {
         return instances.computeIfAbsent(
                 processType,
                 key -> {
@@ -131,7 +130,11 @@ public class ProcessExecutorUtil {
                                                 .getTimeoutMinutes()
                                                 .getCalibreTimeoutMinutes();
                             };
-                    return new ProcessExecutorUtil(semaphoreLimit, liveUpdates, timeoutMinutes);
+                    //                    return new
+                    // ApplicationPropertiesConfiguration.ProcessExecutor(semaphoreLimit,
+                    // liveUpdates, timeoutMinutes);
+                    return new stirling.software.spdf.proprietary.security.util.ProcessExecutor(
+                            semaphoreLimit, liveUpdates, timeoutMinutes);
                 });
     }
 

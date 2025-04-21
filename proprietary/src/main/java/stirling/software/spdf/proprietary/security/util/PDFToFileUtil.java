@@ -87,8 +87,8 @@ public class PDFToFileUtil {
                                     tempInputFile.toString(),
                                     pdfBaseName));
 
-            ProcessExecutorUtil.ProcessExecutorResult returnCode =
-                    ProcessExecutorUtil.getInstance(ProcessExecutorUtil.Processes.PDFTOHTML)
+            ProcessExecutor.ProcessExecutorResult returnCode =
+                    ProcessExecutor.getInstance(ProcessExecutor.Processes.PDFTOHTML)
                             .runCommandWithOutputHandling(command, tempOutputDir.toFile());
             // Process HTML files to Markdown
             File[] outputFiles = Objects.requireNonNull(tempOutputDir.toFile().listFiles());
@@ -143,7 +143,7 @@ public class PDFToFileUtil {
             if (tempInputFile != null) Files.deleteIfExists(tempInputFile);
             if (tempOutputDir != null) FileUtils.deleteDirectory(tempOutputDir.toFile());
         }
-        return WebResponseUtils.bytesToWebResponse(
+        return WebResponseUtil.bytesToWebResponse(
                 fileBytes, fileName, MediaType.APPLICATION_OCTET_STREAM);
     }
 
@@ -179,7 +179,7 @@ public class PDFToFileUtil {
                             Arrays.asList(
                                     "pdftohtml", "-c", tempInputFile.toString(), pdfBaseName));
 
-            ProcessExecutorResult returnCode =
+            ProcessExecutor.ProcessExecutorResult returnCode =
                     ProcessExecutor.getInstance(ProcessExecutor.Processes.PDFTOHTML)
                             .runCommandWithOutputHandling(command, tempOutputDir.toFile());
 
@@ -211,7 +211,7 @@ public class PDFToFileUtil {
             if (tempOutputDir != null) FileUtils.deleteDirectory(tempOutputDir.toFile());
         }
 
-        return WebResponseUtils.bytesToWebResponse(
+        return WebResponseUtil.bytesToWebResponse(
                 fileBytes, fileName, MediaType.APPLICATION_OCTET_STREAM);
     }
 
@@ -267,7 +267,7 @@ public class PDFToFileUtil {
                                     "--outdir",
                                     tempOutputDir.toString(),
                                     tempInputFile.toString()));
-            ProcessExecutorResult returnCode =
+            ProcessExecutor.ProcessExecutorResult returnCode =
                     ProcessExecutor.getInstance(ProcessExecutor.Processes.LIBRE_OFFICE)
                             .runCommandWithOutputHandling(command);
 
@@ -310,7 +310,7 @@ public class PDFToFileUtil {
             Files.deleteIfExists(tempInputFile);
             if (tempOutputDir != null) FileUtils.deleteDirectory(tempOutputDir.toFile());
         }
-        return WebResponseUtils.bytesToWebResponse(
+        return WebResponseUtil.bytesToWebResponse(
                 fileBytes, fileName, MediaType.APPLICATION_OCTET_STREAM);
     }
 }
