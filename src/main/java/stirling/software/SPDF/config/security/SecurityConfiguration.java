@@ -66,14 +66,14 @@ public class SecurityConfiguration {
 
     public SecurityConfiguration(
             @Lazy @Autowired(required = false) PersistentLoginRepository persistentLoginRepository,
-            CustomUserDetailsService userDetailsService,
-            @Lazy UserService userService,
+            @Autowired(required = false) CustomUserDetailsService userDetailsService,
+            @Lazy @Autowired(required = false) UserService userService,
             @Qualifier("loginEnabled") boolean loginEnabledValue,
             @Qualifier("runningProOrHigher") boolean runningProOrHigher,
             ApplicationProperties applicationProperties,
-            UserAuthenticationFilter userAuthenticationFilter,
+            @Lazy @Autowired(required = false) UserAuthenticationFilter userAuthenticationFilter,
             LoginAttemptService loginAttemptService,
-            FirstLoginFilter firstLoginFilter,
+            @Autowired(required = false) FirstLoginFilter firstLoginFilter,
             @Lazy @Autowired(required = false) SessionPersistentRegistry sessionRegistry,
             @Autowired(required = false) GrantedAuthoritiesMapper oAuth2userAuthoritiesMapper,
             @Autowired(required = false)
@@ -144,16 +144,34 @@ public class SecurityConfiguration {
                                         .csrfTokenRequestHandler(requestHandler));
             }
             http.addFilterBefore(rateLimitingFilter(), UsernamePasswordAuthenticationFilter.class);
-            http.addFilterAfter(firstLoginFilter, UsernamePasswordAuthenticationFilter.class);
-            http.sessionManagement(
-                    sessionManagement ->
-                            sessionManagement
-                                    .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                                    .maximumSessions(10)
-                                    .maxSessionsPreventsLogin(false)
-                                    .sessionRegistry(sessionRegistry)
-                                    .expiredUrl("/login?logout=true"));
-            http.authenticationProvider(daoAuthenticationProvider());
+
+            if (!runningProOrHigher) {
+                http.addFilterAfter(firstLoginFilter, UsernamePasswordAuthenticationFilter.class);
+                http.sessionManagement(
+                        sessionManagement ->
+                                sessionManagement
+                                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                                        .maximumSessions(10)
+                                        .maxSessionsPreventsLogin(false)
+                                        .sessionRegistry(sessionRegistry)
+                                        .expiredUrl("/login?logout=true"));
+                http.authenticationProvider(daoAuthenticationProvider());
+                http.rememberMe(
+                        rememberMeConfigurer -> // Use the configurator directly
+                        rememberMeConfigurer
+                                        .tokenRepository(persistentTokenRepository())
+                                        .tokenValiditySeconds( // 14 days
+                                                14 * 24 * 60 * 60)
+                                        .userDetailsService( // Your existing UserDetailsService
+                                                userDetailsService)
+                                        .useSecureCookie( // Enable secure cookie
+                                                true)
+                                        .rememberMeParameter( // Form parameter name
+                                                "remember-me")
+                                        .rememberMeCookieName( // Cookie name
+                                                "remember-me")
+                                        .alwaysRemember(false));
+            }
             http.requestCache(requestCache -> requestCache.requestCache(new NullRequestCache()));
             http.logout(
                     logout ->
@@ -163,21 +181,6 @@ public class SecurityConfiguration {
                                     .clearAuthentication(true)
                                     .invalidateHttpSession(true)
                                     .deleteCookies("JSESSIONID", "remember-me"));
-            http.rememberMe(
-                    rememberMeConfigurer -> // Use the configurator directly
-                    rememberMeConfigurer
-                                    .tokenRepository(persistentTokenRepository())
-                                    .tokenValiditySeconds( // 14 days
-                                            14 * 24 * 60 * 60)
-                                    .userDetailsService( // Your existing UserDetailsService
-                                            userDetailsService)
-                                    .useSecureCookie( // Enable secure cookie
-                                            true)
-                                    .rememberMeParameter( // Form parameter name
-                                            "remember-me")
-                                    .rememberMeCookieName( // Cookie name
-                                            "remember-me")
-                                    .alwaysRemember(false));
             http.authorizeHttpRequests(
                     authz ->
                             authz.requestMatchers(
@@ -222,8 +225,8 @@ public class SecurityConfiguration {
                                         .defaultSuccessUrl("/")
                                         .permitAll());
             }
-            // Handle OAUTH2 Logins
             if (applicationProperties.getSecurity().isOauth2Active()) {
+                log.debug("OAuth 2 login enabled.");
                 http.oauth2Login(
                         oauth2 ->
                                 oauth2.loginPage("/oauth2")
@@ -253,9 +256,10 @@ public class SecurityConfiguration {
                                                                         oAuth2userAuthoritiesMapper))
                                         .permitAll());
             }
-            // Handle SAML
             if (applicationProperties.getSecurity().isSaml2Active() && runningProOrHigher) {
-                // Configure the authentication provider
+                // Configure the SAML authentication provider
+                log.debug("SAML 2 login enabled.");
+
                 OpenSaml4AuthenticationProvider authenticationProvider =
                         new OpenSaml4AuthenticationProvider();
                 authenticationProvider.setResponseAuthenticationConverter(
@@ -285,7 +289,7 @@ public class SecurityConfiguration {
                                 });
             }
         } else {
-            log.debug("SAML 2 login is not enabled. Using default.");
+            log.debug("Login is not enabled. Using default authorisation.");
             http.authorizeHttpRequests(authz -> authz.anyRequest().permitAll());
         }
         return http.build();
@@ -305,6 +309,7 @@ public class SecurityConfiguration {
         return new IPRateLimitingFilter(maxRequestsPerIp, maxRequestsPerIp);
     }
 
+    @Lazy
     @Bean
     public PersistentTokenRepository persistentTokenRepository() {
         return new JPATokenRepositoryImpl(persistentLoginRepository);

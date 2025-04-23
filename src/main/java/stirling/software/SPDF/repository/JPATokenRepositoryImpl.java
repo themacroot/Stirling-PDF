@@ -12,11 +12,11 @@ import stirling.software.SPDF.model.PersistentLogin;
 
 public class JPATokenRepositoryImpl implements PersistentTokenRepository {
 
-    @Lazy
-    @Autowired(required = false)
     private final PersistentLoginRepository persistentLoginRepository;
 
-    public JPATokenRepositoryImpl(PersistentLoginRepository persistentLoginRepository) {
+    public JPATokenRepositoryImpl(
+            @Lazy @Autowired(required = false)
+                    PersistentLoginRepository persistentLoginRepository) {
         this.persistentLoginRepository = persistentLoginRepository;
     }
 

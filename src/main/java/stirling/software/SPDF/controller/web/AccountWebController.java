@@ -56,8 +56,6 @@ public class AccountWebController {
 
     private final ApplicationProperties applicationProperties;
 
-    @Lazy
-    @Autowired(required = false)
     private final SessionPersistentRegistry sessionPersistentRegistry;
 
     // Assuming you have a repository for user operations
@@ -66,8 +64,8 @@ public class AccountWebController {
 
     public AccountWebController(
             ApplicationProperties applicationProperties,
-            SessionPersistentRegistry sessionPersistentRegistry,
-            UserRepository userRepository,
+            @Lazy @Autowired(required = false) SessionPersistentRegistry sessionPersistentRegistry,
+            @Lazy @Autowired(required = false) UserRepository userRepository,
             @Qualifier("runningEE") boolean runningEE) {
         this.applicationProperties = applicationProperties;
         this.sessionPersistentRegistry = sessionPersistentRegistry;

@@ -5,6 +5,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,11 +26,12 @@ import stirling.software.SPDF.utils.RequestUriUtils;
 
 @Slf4j
 @Component
+@ConditionalOnProperty(name = "premium.enabled", havingValue = "true")
 public class FirstLoginFilter extends OncePerRequestFilter {
 
     @Lazy private final UserService userService;
 
-    public FirstLoginFilter(@Lazy UserService userService) {
+    public FirstLoginFilter(@Lazy @Autowired(required = false) UserService userService) {
         this.userService = userService;
     }
 

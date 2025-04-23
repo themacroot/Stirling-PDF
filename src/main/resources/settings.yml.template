@@ -15,7 +15,7 @@ security:
   csrfDisabled: false # set to 'true' to disable CSRF protection (not recommended for production)
   loginAttemptCount: 5 # lock user account after 5 tries; when using e.g. Fail2Ban you can deactivate the function with -1
   loginResetTimeMinutes: 120 # lock account for 2 hours after x attempts
-  loginMethod: all # Accepts values like 'all' and 'normal'(only Login with Username/Password), 'oauth2'(only Login with OAuth2) or 'saml2'(only Login with SAML2)
+  loginMethod: '' # Accepts values like 'all' and 'normal'(only Login with Username/Password), 'oauth2'(only Login with OAuth2) or 'saml2'(only Login with SAML2)
   initialLogin:
     username: '' # initial username for the first login
     password: '' # initial password for the first login
@@ -65,7 +65,7 @@ premium:
   enabled: false # Enable license key checks for pro/enterprise features
   proFeatures:
     database: false # Enable database features
-    SSOAutoLogin: false
+    SSOAutoLogin: false # Enable SSO auto login
     CustomMetadata:
       autoUpdateMetadata: false
       author: username
@@ -96,7 +96,6 @@ system:
   enableUrlToPDF: false # Set to 'true' to enable URL to PDF, INTERNAL ONLY, known security issues, should not be used externally
   disableSanitize: false # set to true to disable Sanitize HTML; (can lead to injections in HTML)
   datasource:
-    enabled: true # set to 'true' to enable the database connection
     enableCustomDatabase: false # Enterprise users ONLY, set this property to 'true' if you would like to use your own custom database configuration
     customDatabaseUrl: '' # eg jdbc:postgresql://localhost:5432/postgres, set the url for your own custom database connection. If provided, the type, hostName, port and name are not necessary and will not be used
     username: postgres # set the database username

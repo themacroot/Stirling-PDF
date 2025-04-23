@@ -3,6 +3,7 @@ package stirling.software.SPDF.config;
 import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -13,6 +14,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Component
+@ConditionalOnProperty(name = "premium.enabled", havingValue = "true")
 public class EnterpriseEndpointFilter extends OncePerRequestFilter {
     private final boolean runningProOrHigher;
 
