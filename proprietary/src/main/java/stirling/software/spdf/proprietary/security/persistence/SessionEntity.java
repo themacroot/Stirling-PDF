@@ -9,8 +9,8 @@ import jakarta.persistence.Table;
 
 import lombok.Data;
 
-@Entity
 @Data
+@Entity
 @Table(name = "sessions")
 public class SessionEntity implements Serializable {
     @Id private String sessionId;

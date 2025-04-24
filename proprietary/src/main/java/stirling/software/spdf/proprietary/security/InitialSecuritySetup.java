@@ -3,6 +3,8 @@ package stirling.software.spdf.proprietary.security;
 import java.sql.SQLException;
 import java.util.UUID;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import jakarta.annotation.PostConstruct;
@@ -16,6 +18,7 @@ import stirling.software.spdf.proprietary.security.service.UserService;
 
 @Slf4j
 @Component
+@ConditionalOnProperty(name = "premium.enabled", havingValue = "true")
 public class InitialSecuritySetup {
 
     private final UserService userService;
@@ -25,9 +28,9 @@ public class InitialSecuritySetup {
     private final DatabaseInterface databaseService;
 
     public InitialSecuritySetup(
-            UserService userService,
+            @Lazy UserService userService,
             ApplicationPropertiesConfiguration applicationProperties,
-            DatabaseInterface databaseService) {
+            @Lazy DatabaseInterface databaseService) {
         this.userService = userService;
         this.applicationProperties = applicationProperties;
         this.databaseService = databaseService;

@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -43,10 +46,11 @@ import stirling.software.spdf.proprietary.security.service.UserService;
 import stirling.software.spdf.proprietary.security.session.SessionPersistentRegistry;
 import stirling.software.spdf.proprietary.security.sso.saml2.CustomSaml2AuthenticatedPrincipal;
 
-@Controller
-@Tag(name = "User", description = "User APIs")
-@RequestMapping("/api/v1/user")
 @Slf4j
+@Controller
+@RequestMapping("/api/v1/user")
+@Tag(name = "User", description = "User APIs")
+@ConditionalOnProperty(name = "premium.enabled", havingValue = "true")
 public class UserController {
 
     private static final String LOGIN_MESSAGETYPE_CREDSUPDATED = "/login?messageType=credsUpdated";
@@ -55,8 +59,8 @@ public class UserController {
     private final ApplicationPropertiesConfiguration applicationProperties;
 
     public UserController(
-            UserService userService,
-            SessionPersistentRegistry sessionRegistry,
+            @Lazy @Autowired(required = false) UserService userService,
+            @Lazy @Autowired(required = false) SessionPersistentRegistry sessionRegistry,
             ApplicationPropertiesConfiguration applicationProperties) {
         this.userService = userService;
         this.sessionRegistry = sessionRegistry;

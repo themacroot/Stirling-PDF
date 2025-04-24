@@ -21,6 +21,9 @@ import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.jdbc.datasource.init.CannotReadScriptException;
 import org.springframework.jdbc.datasource.init.ScriptException;
 import org.springframework.stereotype.Service;
@@ -33,8 +36,10 @@ import stirling.software.spdf.proprietary.security.configuration.InstallationPat
 import stirling.software.spdf.proprietary.security.model.FileInfo;
 import stirling.software.spdf.proprietary.security.model.exception.BackupNotFoundException;
 
+@Lazy
 @Slf4j
 @Service
+@ConditionalOnProperty(name = "premium.proFeatures.database", havingValue = "true")
 public class DatabaseService implements DatabaseInterface {
 
     public static final String BACKUP_PREFIX = "backup_";
@@ -45,7 +50,8 @@ public class DatabaseService implements DatabaseInterface {
     private final DataSource dataSource;
 
     public DatabaseService(
-            ApplicationPropertiesConfiguration applicationProperties, DataSource dataSource) {
+            ApplicationPropertiesConfiguration applicationProperties,
+            @Lazy @Autowired(required = false) DataSource dataSource) {
         this.BACKUP_DIR =
                 Paths.get(InstallationPathConfiguration.getConfigPath(), "db", "backup")
                         .normalize();

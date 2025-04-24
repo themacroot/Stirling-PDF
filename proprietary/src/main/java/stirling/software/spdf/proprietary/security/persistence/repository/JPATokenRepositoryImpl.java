@@ -2,24 +2,28 @@ package stirling.software.spdf.proprietary.security.persistence.repository;
 
 import java.util.Date;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.web.authentication.rememberme.PersistentRememberMeToken;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 import org.springframework.transaction.annotation.Transactional;
 
-import stirling.software.spdf.proprietary.security.model.PersistentLogin;
+import stirling.software.spdf.proprietary.security.model.PersistentLoginEntity;
 
+@ConditionalOnProperty(name = "premium.proFeatures.database", havingValue = "true")
 public class JPATokenRepositoryImpl implements PersistentTokenRepository {
 
     private final PersistentLoginRepository persistentLoginRepository;
 
-    public JPATokenRepositoryImpl(PersistentLoginRepository persistentLoginRepository) {
+    public JPATokenRepositoryImpl(
+            @Autowired(required = false) PersistentLoginRepository persistentLoginRepository) {
         this.persistentLoginRepository = persistentLoginRepository;
     }
 
     @Override
     @Transactional
     public void createNewToken(PersistentRememberMeToken token) {
-        PersistentLogin newToken = new PersistentLogin();
+        PersistentLoginEntity newToken = new PersistentLoginEntity();
         newToken.setSeries(token.getSeries());
         newToken.setUsername(token.getUsername());
         newToken.setToken(token.getTokenValue());
@@ -30,7 +34,8 @@ public class JPATokenRepositoryImpl implements PersistentTokenRepository {
     @Override
     @Transactional
     public void updateToken(String series, String tokenValue, Date lastUsed) {
-        PersistentLogin existingToken = persistentLoginRepository.findById(series).orElse(null);
+        PersistentLoginEntity existingToken =
+                persistentLoginRepository.findById(series).orElse(null);
         if (existingToken != null) {
             existingToken.setToken(tokenValue);
             existingToken.setLastUsed(lastUsed);
@@ -40,7 +45,7 @@ public class JPATokenRepositoryImpl implements PersistentTokenRepository {
 
     @Override
     public PersistentRememberMeToken getTokenForSeries(String seriesId) {
-        PersistentLogin token = persistentLoginRepository.findById(seriesId).orElse(null);
+        PersistentLoginEntity token = persistentLoginRepository.findById(seriesId).orElse(null);
         if (token != null) {
             return new PersistentRememberMeToken(
                     token.getUsername(), token.getSeries(), token.getToken(), token.getLastUsed());

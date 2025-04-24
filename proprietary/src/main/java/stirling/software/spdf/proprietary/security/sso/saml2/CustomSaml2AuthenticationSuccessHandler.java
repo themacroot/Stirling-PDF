@@ -13,24 +13,33 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import stirling.software.spdf.proprietary.security.configuration.ApplicationPropertiesConfiguration;
 import stirling.software.spdf.proprietary.security.model.enumeration.AuthenticationType;
 import stirling.software.spdf.proprietary.security.model.exception.UnsupportedProviderException;
 import stirling.software.spdf.proprietary.security.service.LoginAttemptService;
 import stirling.software.spdf.proprietary.security.service.UserService;
 import stirling.software.spdf.proprietary.security.util.RequestUriUtil;
 
-@AllArgsConstructor
 @Slf4j
 public class CustomSaml2AuthenticationSuccessHandler
         extends SavedRequestAwareAuthenticationSuccessHandler {
 
-    private LoginAttemptService loginAttemptService;
-    private ApplicationPropertiesConfiguration applicationProperties;
-    private UserService userService;
+    private final LoginAttemptService loginAttemptService;
+    private final boolean autoCreateUser;
+    private final boolean blockRegistration;
+    private final UserService userService;
+
+    public CustomSaml2AuthenticationSuccessHandler(
+            boolean autoCreateUser,
+            boolean blockRegistration,
+            LoginAttemptService loginAttemptService,
+            UserService userService) {
+        this.autoCreateUser = autoCreateUser;
+        this.blockRegistration = blockRegistration;
+        this.loginAttemptService = loginAttemptService;
+        this.userService = userService;
+    }
 
     @Override
     public void onAuthenticationSuccess(
@@ -64,11 +73,8 @@ public class CustomSaml2AuthenticationSuccessHandler
                         savedRequest.getRedirectUrl());
                 super.onAuthenticationSuccess(request, response, authentication);
             } else {
-                ApplicationPropertiesConfiguration.Security.SAML2 saml2 =
-                        applicationProperties.getSecurity().getSaml2();
                 log.debug(
-                        "Processing SAML2 authentication with autoCreateUser: {}",
-                        saml2.getAutoCreateUser());
+                        "Processing SAML2 authentication with autoCreateUser: {}", autoCreateUser);
 
                 if (loginAttemptService.isBlocked(username)) {
                     log.debug("User {} is blocked due to too many login attempts", username);
@@ -92,24 +98,27 @@ public class CustomSaml2AuthenticationSuccessHandler
                         hasPassword,
                         isSSOUser);
 
-                if (userExists && hasPassword && !isSSOUser && saml2.getAutoCreateUser()) {
+                if (userExists && hasPassword && !isSSOUser && autoCreateUser) {
                     log.debug(
                             "User {} exists with password but is not SSO user, redirecting to logout",
                             username);
+                    // todo: change to errorSaml2AdminBlockedUser
                     response.sendRedirect(
                             contextPath + "/logout?oAuth2AuthenticationErrorWeb=true");
                     return;
                 }
 
                 try {
-                    if (saml2.getBlockRegistration() && !userExists) {
+                    if (blockRegistration && !userExists) {
                         log.debug("Registration blocked for new user: {}", username);
+                        // todo: change to errorSaml2AdminBlockedUser
                         response.sendRedirect(
                                 contextPath + "/login?errorOAuth=oAuth2AdminBlockedUser");
                         return;
                     }
                     log.debug("Processing SSO post-login for user: {}", username);
-                    userService.processSSOPostLogin(username, saml2.getAutoCreateUser());
+
+                    userService.processSSOPostLogin(username, autoCreateUser);
                     log.debug("Successfully processed authentication for user: {}", username);
                     response.sendRedirect(contextPath + "/");
                 } catch (IllegalArgumentException | SQLException | UnsupportedProviderException e) {

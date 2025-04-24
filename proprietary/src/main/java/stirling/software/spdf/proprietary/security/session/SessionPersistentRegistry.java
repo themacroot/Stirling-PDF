@@ -8,7 +8,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.session.SessionInformation;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,9 +21,12 @@ import org.springframework.stereotype.Component;
 import jakarta.transaction.Transactional;
 
 import stirling.software.spdf.proprietary.security.persistence.SessionEntity;
+import stirling.software.spdf.proprietary.security.persistence.repository.SessionRepository;
 import stirling.software.spdf.proprietary.security.sso.saml2.CustomSaml2AuthenticatedPrincipal;
 
+@Lazy
 @Component
+@ConditionalOnProperty(name = "premium.enabled", havingValue = "true")
 public class SessionPersistentRegistry implements SessionRegistry {
 
     private final SessionRepository sessionRepository;
@@ -28,7 +34,8 @@ public class SessionPersistentRegistry implements SessionRegistry {
     @Value("${server.servlet.session.timeout:30m}")
     private Duration defaultMaxInactiveInterval;
 
-    public SessionPersistentRegistry(SessionRepository sessionRepository) {
+    public SessionPersistentRegistry(
+            @Lazy @Autowired(required = false) SessionRepository sessionRepository) {
         this.sessionRepository = sessionRepository;
     }
 

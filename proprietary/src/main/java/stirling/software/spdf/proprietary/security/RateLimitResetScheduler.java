@@ -1,9 +1,8 @@
 package stirling.software.spdf.proprietary.security;
 
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 
-@Component
+// @Component@ConditionalOnProperty(name = "premium.enabled", havingValue = "true")
 public class RateLimitResetScheduler {
 
     private final IPRateLimitingFilter rateLimitingFilter;

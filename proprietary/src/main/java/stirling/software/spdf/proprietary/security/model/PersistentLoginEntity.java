@@ -9,7 +9,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "persistent_logins")
-public class PersistentLogin {
+public class PersistentLoginEntity {
 
     @Id
     @Column(name = "series")

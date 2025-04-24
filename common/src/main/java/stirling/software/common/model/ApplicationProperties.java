@@ -390,6 +390,7 @@ public class ApplicationProperties {
 
         @Data
         public static class ProFeatures {
+            private boolean database;
             private boolean ssoAutoLogin;
             private CustomMetadata customMetadata = new CustomMetadata();
             private GoogleDrive googleDrive = new GoogleDrive();

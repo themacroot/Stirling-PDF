@@ -2,6 +2,8 @@ package stirling.software.spdf.proprietary.security.service;
 
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -12,6 +14,7 @@ import stirling.software.spdf.proprietary.security.persistence.User;
 import stirling.software.spdf.proprietary.security.persistence.repository.UserRepository;
 
 @Service
+@ConditionalOnProperty(name = "premium.enabled", havingValue = "true")
 class AppUpdateAuthService implements AdminInterface {
 
     private final UserRepository userRepository;
@@ -19,7 +22,7 @@ class AppUpdateAuthService implements AdminInterface {
     private final ApplicationPropertiesConfiguration applicationProperties;
 
     public AppUpdateAuthService(
-            UserRepository userRepository,
+            @Autowired(required = false) UserRepository userRepository,
             ApplicationPropertiesConfiguration applicationProperties) {
         this.userRepository = userRepository;
         this.applicationProperties = applicationProperties;

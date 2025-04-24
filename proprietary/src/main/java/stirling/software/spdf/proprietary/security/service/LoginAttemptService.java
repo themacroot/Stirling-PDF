@@ -3,6 +3,7 @@ package stirling.software.spdf.proprietary.security.service;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.PostConstruct;
@@ -12,8 +13,9 @@ import lombok.extern.slf4j.Slf4j;
 import stirling.software.spdf.proprietary.security.configuration.ApplicationPropertiesConfiguration;
 import stirling.software.spdf.proprietary.security.model.AttemptCounter;
 
-@Service
 @Slf4j
+@Service
+@ConditionalOnProperty(name = "premium.enabled", havingValue = "true")
 public class LoginAttemptService {
 
     private final ApplicationPropertiesConfiguration applicationProperties;

@@ -11,7 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -44,6 +46,7 @@ import stirling.software.spdf.proprietary.security.sso.saml2.CustomSaml2Authenti
 @Controller
 @Slf4j
 @Tag(name = "Account Security", description = "Account Security APIs")
+@ConditionalOnProperty(name = "premium.enabled", havingValue = "true")
 public class AccountWebController {
 
     public static final String OAUTH_2_AUTHORIZATION = "/oauth2/authorization/";
@@ -56,8 +59,8 @@ public class AccountWebController {
 
     public AccountWebController(
             ApplicationPropertiesConfiguration applicationProperties,
-            SessionPersistentRegistry sessionPersistentRegistry,
-            UserRepository userRepository,
+            @Autowired(required = false) SessionPersistentRegistry sessionPersistentRegistry,
+            @Autowired(required = false) UserRepository userRepository,
             @Qualifier("runningEE") boolean runningEE) {
         this.applicationProperties = applicationProperties;
         this.sessionPersistentRegistry = sessionPersistentRegistry;

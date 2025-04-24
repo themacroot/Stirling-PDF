@@ -10,7 +10,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.MessageSource;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -41,8 +44,10 @@ import stirling.software.spdf.proprietary.security.persistence.repository.UserRe
 import stirling.software.spdf.proprietary.security.session.SessionPersistentRegistry;
 import stirling.software.spdf.proprietary.security.sso.saml2.CustomSaml2AuthenticatedPrincipal;
 
-@Service
+@Lazy
 @Slf4j
+@Service
+@ConditionalOnProperty(name = "premium.enabled", havingValue = "true")
 public class UserService implements UserServiceInterface {
 
     private final UserRepository userRepository;
@@ -57,23 +62,23 @@ public class UserService implements UserServiceInterface {
 
     private final DatabaseInterface databaseService;
 
-    private final ApplicationPropertiesConfiguration applicationProperties;
+    private final String useAsUsername;
 
     public UserService(
             UserRepository userRepository,
-            AuthorityRepository authorityRepository,
+            @Autowired(required = false) AuthorityRepository authorityRepository,
             PasswordEncoder passwordEncoder,
             MessageSource messageSource,
-            SessionPersistentRegistry sessionRegistry,
-            DatabaseInterface databaseService,
-            ApplicationPropertiesConfiguration applicationProperties) {
+            @Lazy @Autowired(required = false) SessionPersistentRegistry sessionRegistry,
+            @Lazy @Autowired(required = false) DatabaseInterface databaseService,
+            String useAsUsername) {
         this.userRepository = userRepository;
         this.authorityRepository = authorityRepository;
         this.passwordEncoder = passwordEncoder;
         this.messageSource = messageSource;
         this.sessionRegistry = sessionRegistry;
         this.databaseService = databaseService;
-        this.applicationProperties = applicationProperties;
+        this.useAsUsername = useAsUsername;
     }
 
     @Transactional
@@ -435,8 +440,7 @@ public class UserService implements UserServiceInterface {
         if (principal instanceof UserDetails detailsUser) {
             return detailsUser.getUsername();
         } else if (principal instanceof OAuth2User oAuth2User) {
-            return oAuth2User.getAttribute(
-                    applicationProperties.getSecurity().getOauth2().getUseAsUsername());
+            return oAuth2User.getAttribute(useAsUsername);
         } else if (principal instanceof CustomSaml2AuthenticatedPrincipal saml2User) {
             return saml2User.name();
         } else if (principal instanceof String stringUser) {

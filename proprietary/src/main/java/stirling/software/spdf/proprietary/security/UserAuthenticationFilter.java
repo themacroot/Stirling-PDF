@@ -4,8 +4,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Lazy;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -33,6 +34,7 @@ import stirling.software.spdf.proprietary.security.sso.saml2.CustomSaml2Authenti
 
 @Slf4j
 @Component
+@ConditionalOnProperty(name = "premium.enabled", havingValue = "true")
 public class UserAuthenticationFilter extends OncePerRequestFilter {
 
     private final ApplicationPropertiesConfiguration applicationProperties;
@@ -41,9 +43,9 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
     private final boolean loginEnabledValue;
 
     public UserAuthenticationFilter(
-            @Lazy ApplicationPropertiesConfiguration applicationProperties,
-            @Lazy UserService userService,
-            SessionPersistentRegistry sessionPersistentRegistry,
+            ApplicationPropertiesConfiguration applicationProperties,
+            @Autowired(required = false) UserService userService,
+            @Autowired(required = false) SessionPersistentRegistry sessionPersistentRegistry,
             @Qualifier("loginEnabled") boolean loginEnabledValue) {
         this.applicationProperties = applicationProperties;
         this.userService = userService;

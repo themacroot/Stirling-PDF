@@ -15,7 +15,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
-import stirling.software.spdf.proprietary.security.configuration.ApplicationPropertiesConfiguration;
 import stirling.software.spdf.proprietary.security.model.enumeration.AuthenticationType;
 import stirling.software.spdf.proprietary.security.model.exception.UnsupportedProviderException;
 import stirling.software.spdf.proprietary.security.service.LoginAttemptService;
@@ -26,14 +25,17 @@ public class CustomOAuth2AuthenticationSuccessHandler
         extends SavedRequestAwareAuthenticationSuccessHandler {
 
     private final LoginAttemptService loginAttemptService;
-    private final ApplicationPropertiesConfiguration applicationProperties;
     private final UserService userService;
+    private final boolean autoCreateUser;
+    private final boolean blockRegistration;
 
     public CustomOAuth2AuthenticationSuccessHandler(
+            boolean autoCreateUser,
+            boolean blockRegistration,
             LoginAttemptService loginAttemptService,
-            ApplicationPropertiesConfiguration applicationProperties,
             UserService userService) {
-        this.applicationProperties = applicationProperties;
+        this.autoCreateUser = autoCreateUser;
+        this.blockRegistration = blockRegistration;
         this.userService = userService;
         this.loginAttemptService = loginAttemptService;
     }
@@ -65,9 +67,6 @@ public class CustomOAuth2AuthenticationSuccessHandler
             // Redirect to the original destination
             super.onAuthenticationSuccess(request, response, authentication);
         } else {
-            ApplicationPropertiesConfiguration.Security.OAUTH2 oAuth =
-                    applicationProperties.getSecurity().getOauth2();
-
             if (loginAttemptService.isBlocked(username)) {
                 if (session != null) {
                     session.removeAttribute("SPRING_SECURITY_SAVED_REQUEST");
@@ -81,22 +80,22 @@ public class CustomOAuth2AuthenticationSuccessHandler
                         .sendRedirect(request, response, "/logout?userIsDisabled=true");
                 return;
             }
+
             if (userService.usernameExistsIgnoreCase(username)
                     && userService.hasPassword(username)
                     && !userService.isAuthenticationTypeByUsername(username, AuthenticationType.SSO)
-                    && oAuth.getAutoCreateUser()) {
+                    && autoCreateUser) {
                 response.sendRedirect(contextPath + "/logout?oAuth2AuthenticationErrorWeb=true");
                 return;
             }
 
             try {
-                if (oAuth.getBlockRegistration()
-                        && !userService.usernameExistsIgnoreCase(username)) {
+                if (blockRegistration && !userService.usernameExistsIgnoreCase(username)) {
                     response.sendRedirect(contextPath + "/logout?oAuth2AdminBlockedUser=true");
                     return;
                 }
                 if (principal instanceof OAuth2User) {
-                    userService.processSSOPostLogin(username, oAuth.getAutoCreateUser());
+                    userService.processSSOPostLogin(username, autoCreateUser);
                 }
                 response.sendRedirect(contextPath + "/");
             } catch (IllegalArgumentException | SQLException | UnsupportedProviderException e) {

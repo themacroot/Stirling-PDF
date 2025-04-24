@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -27,6 +28,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import stirling.software.spdf.proprietary.security.model.enumeration.Role;
 
 @Component
+@ConditionalOnProperty(name = "premium.enabled", havingValue = "true")
 public class UserBasedRateLimitingFilter extends OncePerRequestFilter {
 
     private final Map<String, Bucket> apiBuckets = new ConcurrentHashMap<>();

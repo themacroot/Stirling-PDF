@@ -50,10 +50,10 @@ import stirling.software.spdf.proprietary.security.sso.saml2.CustomSaml2Authenti
 import stirling.software.spdf.proprietary.security.sso.saml2.CustomSaml2AuthenticationSuccessHandler;
 import stirling.software.spdf.proprietary.security.sso.saml2.CustomSaml2ResponseAuthenticationConverter;
 
+@Slf4j
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-@Slf4j
 @DependsOn("runningProOrHigher")
 public class SecurityConfiguration {
 
@@ -73,16 +73,16 @@ public class SecurityConfiguration {
     private final OpenSaml4AuthenticationRequestResolver saml2AuthenticationRequestResolver;
 
     public SecurityConfiguration(
-            PersistentLoginRepository persistentLoginRepository,
+            @Lazy @Autowired(required = false) PersistentLoginRepository persistentLoginRepository,
             CustomUserDetailsService userDetailsService,
-            @Lazy UserService userService,
+            @Lazy @Autowired(required = false) UserService userService,
             @Qualifier("loginEnabled") boolean loginEnabledValue,
             @Qualifier("runningProOrHigher") boolean runningProOrHigher,
             ApplicationPropertiesConfiguration applicationPropertiesConfiguration,
-            UserAuthenticationFilter userAuthenticationFilter,
+            @Lazy @Autowired(required = false) UserAuthenticationFilter userAuthenticationFilter,
             LoginAttemptService loginAttemptService,
-            FirstLoginFilter firstLoginFilter,
-            @Lazy SessionPersistentRegistry sessionRegistry,
+            @Lazy @Autowired(required = false) FirstLoginFilter firstLoginFilter,
+            @Lazy @Autowired(required = false) SessionPersistentRegistry sessionRegistry,
             @Autowired(required = false) GrantedAuthoritiesMapper oAuth2userAuthoritiesMapper,
             @Autowired(required = false)
                     RelyingPartyRegistrationRepository saml2RelyingPartyRegistrations,
@@ -245,8 +245,15 @@ public class SecurityConfiguration {
                                          */
                                         successHandler(
                                                 new CustomOAuth2AuthenticationSuccessHandler(
+                                                        applicationPropertiesConfiguration
+                                                                .getSecurity()
+                                                                .getOauth2()
+                                                                .getAutoCreateUser(),
+                                                        applicationPropertiesConfiguration
+                                                                .getSecurity()
+                                                                .getOauth2()
+                                                                .getBlockRegistration(),
                                                         loginAttemptService,
-                                                        applicationPropertiesConfiguration,
                                                         userService))
                                         .failureHandler(
                                                 new CustomOAuth2AuthenticationFailureHandler())
@@ -256,7 +263,11 @@ public class SecurityConfiguration {
                                                         userInfoEndpoint
                                                                 .oidcUserService(
                                                                         new CustomOAuth2UserService(
-                                                                                applicationPropertiesConfiguration,
+                                                                                applicationPropertiesConfiguration
+                                                                                        .getSecurity()
+                                                                                        .getOauth2()
+                                                                                        .getUseAsUsername()
+                                                                                        .toUpperCase(),
                                                                                 userService,
                                                                                 loginAttemptService))
                                                                 .userAuthoritiesMapper(
@@ -282,8 +293,15 @@ public class SecurityConfiguration {
                                                         new ProviderManager(authenticationProvider))
                                                 .successHandler(
                                                         new CustomSaml2AuthenticationSuccessHandler(
+                                                                applicationPropertiesConfiguration
+                                                                        .getSecurity()
+                                                                        .getSaml2()
+                                                                        .getAutoCreateUser(),
+                                                                applicationPropertiesConfiguration
+                                                                        .getSecurity()
+                                                                        .getSaml2()
+                                                                        .getBlockRegistration(),
                                                                 loginAttemptService,
-                                                                applicationPropertiesConfiguration,
                                                                 userService))
                                                 .failureHandler(
                                                         new CustomSaml2AuthenticationFailureHandler())
@@ -296,7 +314,7 @@ public class SecurityConfiguration {
                                 });
             }
         } else {
-            log.debug("SAML 2 login is not enabled. Using default.");
+            log.info("Login is not enabled. Using default authorisation.");
             http.authorizeHttpRequests(authz -> authz.anyRequest().permitAll());
         }
         return http.build();
