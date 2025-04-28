@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
@@ -31,14 +32,11 @@ import jakarta.transaction.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
 
-import stirling.software.spdf.proprietary.security.DatabaseInterface;
-import stirling.software.spdf.proprietary.security.UserServiceInterface;
-import stirling.software.spdf.proprietary.security.configuration.ApplicationPropertiesConfiguration;
-import stirling.software.spdf.proprietary.security.model.Authority;
 import stirling.software.spdf.proprietary.security.model.enumeration.AuthenticationType;
 import stirling.software.spdf.proprietary.security.model.enumeration.Role;
 import stirling.software.spdf.proprietary.security.model.exception.UnsupportedProviderException;
-import stirling.software.spdf.proprietary.security.persistence.User;
+import stirling.software.spdf.proprietary.security.persistence.AuthorityEntity;
+import stirling.software.spdf.proprietary.security.persistence.UserEntity;
 import stirling.software.spdf.proprietary.security.persistence.repository.AuthorityRepository;
 import stirling.software.spdf.proprietary.security.persistence.repository.UserRepository;
 import stirling.software.spdf.proprietary.security.session.SessionPersistentRegistry;
@@ -60,25 +58,24 @@ public class UserService implements UserServiceInterface {
 
     private final SessionPersistentRegistry sessionRegistry;
 
-    private final DatabaseInterface databaseService;
+    private final DatabaseServiceInterface databaseService;
 
-    private final String useAsUsername;
+    @Value("${security.oauth2.useAsUsername:email}")
+    private String useAsUsername;
 
     public UserService(
             UserRepository userRepository,
             @Autowired(required = false) AuthorityRepository authorityRepository,
             PasswordEncoder passwordEncoder,
             MessageSource messageSource,
-            @Lazy @Autowired(required = false) SessionPersistentRegistry sessionRegistry,
-            @Lazy @Autowired(required = false) DatabaseInterface databaseService,
-            String useAsUsername) {
+            @Autowired(required = false) SessionPersistentRegistry sessionRegistry,
+            @Autowired(required = false) DatabaseServiceInterface databaseService) {
         this.userRepository = userRepository;
         this.authorityRepository = authorityRepository;
         this.passwordEncoder = passwordEncoder;
         this.messageSource = messageSource;
         this.sessionRegistry = sessionRegistry;
         this.databaseService = databaseService;
-        this.useAsUsername = useAsUsername;
     }
 
     @Transactional
@@ -98,7 +95,7 @@ public class UserService implements UserServiceInterface {
         if (!isUsernameValid(username)) {
             return;
         }
-        Optional<User> existingUser = findByUsernameIgnoreCase(username);
+        Optional<UserEntity> existingUser = findByUsernameIgnoreCase(username);
         if (existingUser.isPresent()) {
             return;
         }
@@ -108,7 +105,7 @@ public class UserService implements UserServiceInterface {
     }
 
     public Authentication getAuthentication(String apiKey) {
-        Optional<User> user = getUserByApiKey(apiKey);
+        Optional<UserEntity> user = getUserByApiKey(apiKey);
         if (!user.isPresent()) {
             throw new UsernameNotFoundException("API key is not valid");
         }
@@ -119,10 +116,12 @@ public class UserService implements UserServiceInterface {
                 getAuthorities(user.get()));
     }
 
-    private Collection<? extends GrantedAuthority> getAuthorities(User user) {
+    private Collection<? extends GrantedAuthority> getAuthorities(UserEntity user) {
         // Convert each Authority object into a SimpleGrantedAuthority object.
         return user.getAuthorities().stream()
-                .map((Authority authority) -> new SimpleGrantedAuthority(authority.getAuthority()))
+                .map(
+                        (AuthorityEntity authority) ->
+                                new SimpleGrantedAuthority(authority.getAuthority()))
                 .toList();
     }
 
@@ -135,9 +134,9 @@ public class UserService implements UserServiceInterface {
         return apiKey;
     }
 
-    public User addApiKeyToUser(String username) {
-        Optional<User> userOpt = findByUsernameIgnoreCase(username);
-        User user = saveUser(userOpt, generateApiKey());
+    public UserEntity addApiKeyToUser(String username) {
+        Optional<UserEntity> userOpt = findByUsernameIgnoreCase(username);
+        UserEntity user = saveUser(userOpt, generateApiKey());
         try {
             databaseService.exportDatabase();
         } catch (SQLException | UnsupportedProviderException e) {
@@ -146,13 +145,13 @@ public class UserService implements UserServiceInterface {
         return user;
     }
 
-    public User refreshApiKeyForUser(String username) {
+    public UserEntity refreshApiKeyForUser(String username) {
         // reuse the add API key method for refreshing
         return addApiKeyToUser(username);
     }
 
     public String getApiKeyForUser(String username) {
-        User user =
+        UserEntity user =
                 findByUsernameIgnoreCase(username)
                         .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         if (user.getApiKey() == null || user.getApiKey().length() == 0) {
@@ -165,12 +164,12 @@ public class UserService implements UserServiceInterface {
         return userRepository.findByApiKey(apiKey).isPresent();
     }
 
-    public Optional<User> getUserByApiKey(String apiKey) {
+    public Optional<UserEntity> getUserByApiKey(String apiKey) {
         return userRepository.findByApiKey(apiKey);
     }
 
-    public Optional<User> loadUserByApiKey(String apiKey) {
-        Optional<User> user = userRepository.findByApiKey(apiKey);
+    public Optional<UserEntity> loadUserByApiKey(String apiKey) {
+        Optional<UserEntity> user = userRepository.findByApiKey(apiKey);
         if (user.isPresent()) {
             return user;
         }
@@ -179,7 +178,7 @@ public class UserService implements UserServiceInterface {
     }
 
     public boolean validateApiKeyForUser(String username, String apiKey) {
-        Optional<User> userOpt = findByUsernameIgnoreCase(username);
+        Optional<UserEntity> userOpt = findByUsernameIgnoreCase(username);
         return userOpt.isPresent() && apiKey.equals(userOpt.get().getApiKey());
     }
 
@@ -188,7 +187,7 @@ public class UserService implements UserServiceInterface {
         saveUser(username, authenticationType, Role.USER.getRoleId());
     }
 
-    private User saveUser(Optional<User> user, String apiKey) {
+    private UserEntity saveUser(Optional<UserEntity> user, String apiKey) {
         if (user.isPresent()) {
             user.get().setApiKey(apiKey);
             return userRepository.save(user.get());
@@ -201,11 +200,11 @@ public class UserService implements UserServiceInterface {
         if (!isUsernameValid(username)) {
             throw new IllegalArgumentException(getInvalidUsernameMessage());
         }
-        User user = new User();
+        UserEntity user = new UserEntity();
         user.setUsername(username);
         user.setEnabled(true);
         user.setFirstLogin(false);
-        user.addAuthority(new Authority(role, user));
+        user.addAuthority(new AuthorityEntity(role, user));
         user.setAuthenticationType(authenticationType);
         userRepository.save(user);
         databaseService.exportDatabase();
@@ -216,12 +215,12 @@ public class UserService implements UserServiceInterface {
         if (!isUsernameValid(username)) {
             throw new IllegalArgumentException(getInvalidUsernameMessage());
         }
-        User user = new User();
+        UserEntity user = new UserEntity();
         user.setUsername(username);
         user.setPassword(passwordEncoder.encode(password));
         user.setEnabled(true);
         user.setAuthenticationType(AuthenticationType.WEB);
-        user.addAuthority(new Authority(Role.USER.getRoleId(), user));
+        user.addAuthority(new AuthorityEntity(Role.USER.getRoleId(), user));
         userRepository.save(user);
         databaseService.exportDatabase();
     }
@@ -231,10 +230,10 @@ public class UserService implements UserServiceInterface {
         if (!isUsernameValid(username)) {
             throw new IllegalArgumentException(getInvalidUsernameMessage());
         }
-        User user = new User();
+        UserEntity user = new UserEntity();
         user.setUsername(username);
         user.setPassword(passwordEncoder.encode(password));
-        user.addAuthority(new Authority(role, user));
+        user.addAuthority(new AuthorityEntity(role, user));
         user.setEnabled(true);
         user.setAuthenticationType(AuthenticationType.WEB);
         user.setFirstLogin(firstLogin);
@@ -252,10 +251,10 @@ public class UserService implements UserServiceInterface {
         if (!isUsernameValid(username)) {
             throw new IllegalArgumentException(getInvalidUsernameMessage());
         }
-        User user = new User();
+        UserEntity user = new UserEntity();
         user.setUsername(username);
         user.setPassword(passwordEncoder.encode(password));
-        user.addAuthority(new Authority(Role.USER.getRoleId(), user));
+        user.addAuthority(new AuthorityEntity(Role.USER.getRoleId(), user));
         user.setEnabled(enabled);
         user.setAuthenticationType(AuthenticationType.WEB);
         user.setFirstLogin(firstLogin);
@@ -264,9 +263,9 @@ public class UserService implements UserServiceInterface {
     }
 
     public void deleteUser(String username) {
-        Optional<User> userOpt = findByUsernameIgnoreCase(username);
+        Optional<UserEntity> userOpt = findByUsernameIgnoreCase(username);
         if (userOpt.isPresent()) {
-            for (Authority authority : userOpt.get().getAuthorities()) {
+            for (AuthorityEntity authority : userOpt.get().getAuthorities()) {
                 if (authority.getAuthority().equals(Role.INTERNAL_API_USER.getRoleId())) {
                     return;
                 }
@@ -294,9 +293,9 @@ public class UserService implements UserServiceInterface {
 
     public void updateUserSettings(String username, Map<String, String> updates)
             throws SQLException, UnsupportedProviderException {
-        Optional<User> userOpt = findByUsernameIgnoreCaseWithSettings(username);
+        Optional<UserEntity> userOpt = findByUsernameIgnoreCaseWithSettings(username);
         if (userOpt.isPresent()) {
-            User user = userOpt.get();
+            UserEntity user = userOpt.get();
             Map<String, String> settingsMap = user.getSettings();
             if (settingsMap == null) {
                 settingsMap = new HashMap<>();
@@ -309,23 +308,23 @@ public class UserService implements UserServiceInterface {
         }
     }
 
-    public Optional<User> findByUsername(String username) {
+    public Optional<UserEntity> findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
 
-    public Optional<User> findByUsernameIgnoreCase(String username) {
+    public Optional<UserEntity> findByUsernameIgnoreCase(String username) {
         return userRepository.findByUsernameIgnoreCase(username);
     }
 
-    public Optional<User> findByUsernameIgnoreCaseWithSettings(String username) {
+    public Optional<UserEntity> findByUsernameIgnoreCaseWithSettings(String username) {
         return userRepository.findByUsernameIgnoreCaseWithSettings(username);
     }
 
-    public Authority findRole(User user) {
+    public AuthorityEntity findRole(UserEntity user) {
         return authorityRepository.findByUserId(user.getId());
     }
 
-    public void changeUsername(User user, String newUsername)
+    public void changeUsername(UserEntity user, String newUsername)
             throws IllegalArgumentException,
                     IOException,
                     SQLException,
@@ -338,36 +337,36 @@ public class UserService implements UserServiceInterface {
         databaseService.exportDatabase();
     }
 
-    public void changePassword(User user, String newPassword)
+    public void changePassword(UserEntity user, String newPassword)
             throws SQLException, UnsupportedProviderException {
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
         databaseService.exportDatabase();
     }
 
-    public void changeFirstUse(User user, boolean firstUse)
+    public void changeFirstUse(UserEntity user, boolean firstUse)
             throws SQLException, UnsupportedProviderException {
         user.setFirstLogin(firstUse);
         userRepository.save(user);
         databaseService.exportDatabase();
     }
 
-    public void changeRole(User user, String newRole)
+    public void changeRole(UserEntity user, String newRole)
             throws SQLException, UnsupportedProviderException {
-        Authority userAuthority = this.findRole(user);
+        AuthorityEntity userAuthority = this.findRole(user);
         userAuthority.setAuthority(newRole);
         authorityRepository.save(userAuthority);
         databaseService.exportDatabase();
     }
 
-    public void changeUserEnabled(User user, Boolean enbeled)
+    public void changeUserEnabled(UserEntity user, Boolean enbeled)
             throws SQLException, UnsupportedProviderException {
         user.setEnabled(enbeled);
         userRepository.save(user);
         databaseService.exportDatabase();
     }
 
-    public boolean isPasswordCorrect(User user, String currentPassword) {
+    public boolean isPasswordCorrect(UserEntity user, String currentPassword) {
         return passwordEncoder.matches(currentPassword, user.getPassword());
     }
 
@@ -396,19 +395,19 @@ public class UserService implements UserServiceInterface {
     }
 
     public boolean hasPassword(String username) {
-        Optional<User> user = findByUsernameIgnoreCase(username);
+        Optional<UserEntity> user = findByUsernameIgnoreCase(username);
         return user.isPresent() && user.get().hasPassword();
     }
 
     public boolean isAuthenticationTypeByUsername(
             String username, AuthenticationType authenticationType) {
-        Optional<User> user = findByUsernameIgnoreCase(username);
+        Optional<UserEntity> user = findByUsernameIgnoreCase(username);
         return user.isPresent()
                 && authenticationType.name().equalsIgnoreCase(user.get().getAuthenticationType());
     }
 
     public boolean isUserDisabled(String username) {
-        Optional<User> userOpt = findByUsernameIgnoreCase(username);
+        Optional<UserEntity> userOpt = findByUsernameIgnoreCase(username);
         return userOpt.map(user -> !user.isEnabled()).orElse(false);
     }
 
@@ -456,12 +455,12 @@ public class UserService implements UserServiceInterface {
         }
 
         String username = "CUSTOM_API_USER";
-        Optional<User> existingUser = findByUsernameIgnoreCase(username);
+        Optional<UserEntity> existingUser = findByUsernameIgnoreCase(username);
 
         existingUser.ifPresentOrElse(
                 user -> {
                     // Update API key if it has changed
-                    User updatedUser = existingUser.get();
+                    UserEntity updatedUser = existingUser.get();
 
                     if (!customApiKey.equals(updatedUser.getApiKey())) {
                         updatedUser.setApiKey(customApiKey);
@@ -470,14 +469,15 @@ public class UserService implements UserServiceInterface {
                 },
                 () -> {
                     // Create new user with API role
-                    User user = new User();
+                    UserEntity user = new UserEntity();
                     user.setUsername(username);
                     user.setPassword(UUID.randomUUID().toString());
                     user.setEnabled(true);
                     user.setFirstLogin(false);
                     user.setAuthenticationType(AuthenticationType.WEB);
                     user.setApiKey(customApiKey);
-                    user.addAuthority(new Authority(Role.INTERNAL_API_USER.getRoleId(), user));
+                    user.addAuthority(
+                            new AuthorityEntity(Role.INTERNAL_API_USER.getRoleId(), user));
                     userRepository.save(user);
                 });
 

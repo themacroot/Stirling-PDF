@@ -9,13 +9,12 @@ import java.util.stream.Collectors;
 
 import jakarta.persistence.*;
 
-import stirling.software.spdf.proprietary.security.model.Authority;
 import stirling.software.spdf.proprietary.security.model.enumeration.AuthenticationType;
 import stirling.software.spdf.proprietary.security.model.enumeration.Role;
 
 @Entity
 @Table(name = "users")
-public class User implements Serializable {
+public class UserEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -46,7 +45,7 @@ public class User implements Serializable {
     private String authenticationType;
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "user")
-    private Set<Authority> authorities = new HashSet<>();
+    private Set<AuthorityEntity> authorities = new HashSet<>();
 
     @ElementCollection
     @MapKeyColumn(name = "setting_key")
@@ -123,25 +122,25 @@ public class User implements Serializable {
         this.authenticationType = authenticationType.toString().toLowerCase();
     }
 
-    public Set<Authority> getAuthorities() {
+    public Set<AuthorityEntity> getAuthorities() {
         return authorities;
     }
 
-    public void setAuthorities(Set<Authority> authorities) {
+    public void setAuthorities(Set<AuthorityEntity> authorities) {
         this.authorities = authorities;
     }
 
-    public void addAuthorities(Set<Authority> authorities) {
+    public void addAuthorities(Set<AuthorityEntity> authorities) {
         this.authorities.addAll(authorities);
     }
 
-    public void addAuthority(Authority authorities) {
+    public void addAuthority(AuthorityEntity authorities) {
         this.authorities.add(authorities);
     }
 
     public String getRolesAsString() {
         return this.authorities.stream()
-                .map(Authority::getAuthority)
+                .map(AuthorityEntity::getAuthority)
                 .collect(Collectors.joining(", "));
     }
 

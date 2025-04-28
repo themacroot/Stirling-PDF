@@ -1,4 +1,4 @@
-package stirling.software.spdf.proprietary.security.model;
+package stirling.software.spdf.proprietary.security.persistence;
 
 import java.io.Serializable;
 
@@ -11,11 +11,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
-import stirling.software.spdf.proprietary.security.persistence.User;
-
 @Entity
 @Table(name = "authorities")
-public class Authority implements Serializable {
+public class AuthorityEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -28,11 +26,11 @@ public class Authority implements Serializable {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private User user;
+    private UserEntity user;
 
-    public Authority() {}
+    public AuthorityEntity() {}
 
-    public Authority(String authority, User user) {
+    public AuthorityEntity(String authority, UserEntity user) {
         this.authority = authority;
         this.user = user;
         user.getAuthorities().add(this);
@@ -54,11 +52,11 @@ public class Authority implements Serializable {
         this.authority = authority;
     }
 
-    public User getUser() {
+    public UserEntity getUser() {
         return user;
     }
 
-    public void setUser(User user) {
+    public void setUser(UserEntity user) {
         this.user = user;
     }
 }

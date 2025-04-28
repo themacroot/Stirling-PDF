@@ -32,7 +32,7 @@ import stirling.software.spdf.proprietary.security.model.provider.GitHubProvider
 import stirling.software.spdf.proprietary.security.model.provider.GoogleProvider;
 import stirling.software.spdf.proprietary.security.model.provider.KeycloakProvider;
 import stirling.software.spdf.proprietary.security.model.provider.Provider;
-import stirling.software.spdf.proprietary.security.persistence.User;
+import stirling.software.spdf.proprietary.security.persistence.UserEntity;
 import stirling.software.spdf.proprietary.security.service.UserService;
 
 @Slf4j
@@ -239,11 +239,11 @@ public class OAuth2Configuration {
                                             .getSecurity()
                                             .getOauth2()
                                             .getUseAsUsername();
-                            Optional<User> userOpt =
+                            Optional<UserEntity> userOpt =
                                     userService.findByUsernameIgnoreCase(
                                             (String) oAuth2Auth.getAttributes().get(useAsUsername));
                             if (userOpt.isPresent()) {
-                                User user = userOpt.get();
+                                UserEntity user = userOpt.get();
                                 mappedAuthorities.add(
                                         new SimpleGrantedAuthority(
                                                 userService.findRole(user).getAuthority()));

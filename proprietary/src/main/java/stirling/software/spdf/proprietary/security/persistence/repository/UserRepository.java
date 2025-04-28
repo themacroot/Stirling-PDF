@@ -9,19 +9,20 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import stirling.software.spdf.proprietary.security.persistence.User;
+import stirling.software.spdf.proprietary.security.persistence.UserEntity;
 
 @Repository
 @ConditionalOnProperty(name = "premium.proFeatures.database", havingValue = "true")
-public interface UserRepository extends JpaRepository<User, Long> {
-    Optional<User> findByUsernameIgnoreCase(String username);
+public interface UserRepository extends JpaRepository<UserEntity, Long> {
+    Optional<UserEntity> findByUsernameIgnoreCase(String username);
 
-    @Query("FROM User u LEFT JOIN FETCH u.settings where upper(u.username) = upper(:username)")
-    Optional<User> findByUsernameIgnoreCaseWithSettings(@Param("username") String username);
+    @Query(
+            "FROM UserEntity u LEFT JOIN FETCH u.settings where upper(u.username) = upper(:username)")
+    Optional<UserEntity> findByUsernameIgnoreCaseWithSettings(@Param("username") String username);
 
-    Optional<User> findByUsername(String username);
+    Optional<UserEntity> findByUsername(String username);
 
-    Optional<User> findByApiKey(String apiKey);
+    Optional<UserEntity> findByApiKey(String apiKey);
 
-    List<User> findByAuthenticationTypeIgnoreCase(String authenticationType);
+    List<UserEntity> findByAuthenticationTypeIgnoreCase(String authenticationType);
 }

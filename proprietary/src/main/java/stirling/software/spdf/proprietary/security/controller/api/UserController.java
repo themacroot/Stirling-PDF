@@ -41,7 +41,7 @@ import stirling.software.spdf.proprietary.security.model.api.user.UsernameAndPas
 import stirling.software.spdf.proprietary.security.model.enumeration.AuthenticationType;
 import stirling.software.spdf.proprietary.security.model.enumeration.Role;
 import stirling.software.spdf.proprietary.security.model.exception.UnsupportedProviderException;
-import stirling.software.spdf.proprietary.security.persistence.User;
+import stirling.software.spdf.proprietary.security.persistence.UserEntity;
 import stirling.software.spdf.proprietary.security.service.UserService;
 import stirling.software.spdf.proprietary.security.session.SessionPersistentRegistry;
 import stirling.software.spdf.proprietary.security.sso.saml2.CustomSaml2AuthenticatedPrincipal;
@@ -100,11 +100,11 @@ public class UserController {
             return new RedirectView("/account?messageType=notAuthenticated", true);
         }
         // The username MUST be unique when renaming
-        Optional<User> userOpt = userService.findByUsername(principal.getName());
+        Optional<UserEntity> userOpt = userService.findByUsername(principal.getName());
         if (userOpt == null || userOpt.isEmpty()) {
             return new RedirectView("/account?messageType=userNotFound", true);
         }
-        User user = userOpt.get();
+        UserEntity user = userOpt.get();
         if (user.getUsername().equals(newUsername)) {
             return new RedirectView("/account?messageType=usernameExists", true);
         }
@@ -139,11 +139,11 @@ public class UserController {
         if (principal == null) {
             return new RedirectView("/change-creds?messageType=notAuthenticated", true);
         }
-        Optional<User> userOpt = userService.findByUsernameIgnoreCase(principal.getName());
+        Optional<UserEntity> userOpt = userService.findByUsernameIgnoreCase(principal.getName());
         if (userOpt.isEmpty()) {
             return new RedirectView("/change-creds?messageType=userNotFound", true);
         }
-        User user = userOpt.get();
+        UserEntity user = userOpt.get();
         if (!userService.isPasswordCorrect(user, currentPassword)) {
             return new RedirectView("/change-creds?messageType=incorrectPassword", true);
         }
@@ -167,11 +167,11 @@ public class UserController {
         if (principal == null) {
             return new RedirectView("/account?messageType=notAuthenticated", true);
         }
-        Optional<User> userOpt = userService.findByUsernameIgnoreCase(principal.getName());
+        Optional<UserEntity> userOpt = userService.findByUsernameIgnoreCase(principal.getName());
         if (userOpt.isEmpty()) {
             return new RedirectView("/account?messageType=userNotFound", true);
         }
-        User user = userOpt.get();
+        UserEntity user = userOpt.get();
         if (!userService.isPasswordCorrect(user, currentPassword)) {
             return new RedirectView("/account?messageType=incorrectPassword", true);
         }
@@ -215,9 +215,9 @@ public class UserController {
                         <= userService.getTotalUsersCount()) {
             return new RedirectView("/adminSettings?messageType=maxUsersReached", true);
         }
-        Optional<User> userOpt = userService.findByUsernameIgnoreCase(username);
+        Optional<UserEntity> userOpt = userService.findByUsernameIgnoreCase(username);
         if (userOpt.isPresent()) {
-            User user = userOpt.get();
+            UserEntity user = userOpt.get();
             if (user.getUsername().equalsIgnoreCase(username)) {
                 return new RedirectView("/adminSettings?messageType=usernameExists", true);
             }
@@ -256,7 +256,7 @@ public class UserController {
             @RequestParam(name = "role") String role,
             Authentication authentication)
             throws SQLException, UnsupportedProviderException {
-        Optional<User> userOpt = userService.findByUsernameIgnoreCase(username);
+        Optional<UserEntity> userOpt = userService.findByUsernameIgnoreCase(username);
         if (!userOpt.isPresent()) {
             return new RedirectView("/adminSettings?messageType=userNotFound", true);
         }
@@ -280,7 +280,7 @@ public class UserController {
             // If the role ID is not valid, redirect with an error message
             return new RedirectView("/adminSettings?messageType=invalidRole", true);
         }
-        User user = userOpt.get();
+        UserEntity user = userOpt.get();
         userService.changeRole(user, role);
         return new RedirectView(
                 "/adminSettings", // Redirect to account page after adding the user
@@ -294,7 +294,7 @@ public class UserController {
             @RequestParam("enabled") boolean enabled,
             Authentication authentication)
             throws SQLException, UnsupportedProviderException {
-        Optional<User> userOpt = userService.findByUsernameIgnoreCase(username);
+        Optional<UserEntity> userOpt = userService.findByUsernameIgnoreCase(username);
         if (userOpt.isEmpty()) {
             return new RedirectView("/adminSettings?messageType=userNotFound", true);
         }
@@ -307,7 +307,7 @@ public class UserController {
         if (currentUsername.equalsIgnoreCase(username)) {
             return new RedirectView("/adminSettings?messageType=disabledCurrentUser", true);
         }
-        User user = userOpt.get();
+        UserEntity user = userOpt.get();
         userService.changeUserEnabled(user, enabled);
         if (!enabled) {
             // Invalidate all sessions if the user is being disabled
@@ -382,7 +382,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not authenticated.");
         }
         String username = principal.getName();
-        User user = userService.refreshApiKeyForUser(username);
+        UserEntity user = userService.refreshApiKeyForUser(username);
         String apiKey = user.getApiKey();
         if (apiKey == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("API key not found for user.");

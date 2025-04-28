@@ -1,4 +1,4 @@
-package stirling.software.spdf.proprietary.security.model;
+package stirling.software.spdf.proprietary.security.persistence;
 
 import java.util.Date;
 

@@ -1,4 +1,4 @@
-package stirling.software.spdf.proprietary.security;
+package stirling.software.spdf.proprietary.security.service;
 
 public interface UserServiceInterface {
     String getApiKeyForUser(String username);

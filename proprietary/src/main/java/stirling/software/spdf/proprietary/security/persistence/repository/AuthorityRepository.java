@@ -6,13 +6,13 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import stirling.software.spdf.proprietary.security.model.Authority;
+import stirling.software.spdf.proprietary.security.persistence.AuthorityEntity;
 
 @Repository
 @ConditionalOnProperty(name = "premium.proFeatures.database", havingValue = "true")
-public interface AuthorityRepository extends JpaRepository<Authority, Long> {
+public interface AuthorityRepository extends JpaRepository<AuthorityEntity, Long> {
     // Set<Authority> findByUsername(String username);
-    Set<Authority> findByUser_Username(String username);
+    Set<AuthorityEntity> findByUser_Username(String username);
 
-    Authority findByUserId(long user_id);
+    AuthorityEntity findByUserId(long user_id);
 }

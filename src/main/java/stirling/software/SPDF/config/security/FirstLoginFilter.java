@@ -22,7 +22,8 @@ import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 
 import stirling.software.SPDF.utils.RequestUriUtils;
-import stirling.software.spdf.proprietary.security.persistence.User;
+import stirling.software.spdf.proprietary.security.persistence.UserEntity;
+import stirling.software.spdf.proprietary.security.service.UserService;
 
 @Slf4j
 @Component
@@ -51,7 +52,8 @@ public class FirstLoginFilter extends OncePerRequestFilter {
         }
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()) {
-            Optional<User> user = userService.findByUsernameIgnoreCase(authentication.getName());
+            Optional<UserEntity> user =
+                    userService.findByUsernameIgnoreCase(authentication.getName());
             if ("GET".equalsIgnoreCase(method)
                     && user.isPresent()
                     && user.get().isFirstLogin()

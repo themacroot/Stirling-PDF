@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import stirling.software.spdf.proprietary.security.configuration.ApplicationPropertiesConfiguration;
 import stirling.software.spdf.proprietary.security.model.AdminInterface;
-import stirling.software.spdf.proprietary.security.persistence.User;
+import stirling.software.spdf.proprietary.security.persistence.UserEntity;
 import stirling.software.spdf.proprietary.security.persistence.repository.UserRepository;
 
 @Service
@@ -42,7 +42,7 @@ class AppUpdateAuthService implements AdminInterface {
         if (authentication.getName().equalsIgnoreCase("anonymousUser")) {
             return !showUpdateOnlyAdmin;
         }
-        Optional<User> user = userRepository.findByUsername(authentication.getName());
+        Optional<UserEntity> user = userRepository.findByUsername(authentication.getName());
         if (user.isPresent() && showUpdateOnlyAdmin) {
             return "ROLE_ADMIN".equals(user.get().getRolesAsString());
         }

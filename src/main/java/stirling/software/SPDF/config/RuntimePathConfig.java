@@ -4,6 +4,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
 
 import lombok.Getter;
@@ -29,7 +30,7 @@ public class RuntimePathConfig {
     private final String pipelineDefaultWebUiConfigs;
     private final String pipelinePath;
 
-    public RuntimePathConfig(ApplicationProperties properties) {
+    public RuntimePathConfig(@Qualifier("applicationProperties") ApplicationProperties properties) {
         this.properties = properties;
         this.basePath = InstallationPathConfig.getPath();
 

@@ -5,7 +5,6 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -35,11 +34,10 @@ public class UserBasedRateLimitingFilter extends OncePerRequestFilter {
 
     private final Map<String, Bucket> webBuckets = new ConcurrentHashMap<>();
 
-    @Qualifier("rateLimit")
     private final boolean rateLimit;
 
-    public UserBasedRateLimitingFilter(@Qualifier("rateLimit") boolean rateLimit) {
-        this.rateLimit = rateLimit;
+    public UserBasedRateLimitingFilter() {
+        this.rateLimit = getRateLimit();
     }
 
     @Override
@@ -142,5 +140,11 @@ public class UserBasedRateLimitingFilter extends OncePerRequestFilter {
                         .refillIntervally(limitPerDay, Duration.ofDays(1))
                         .build();
         return Bucket.builder().addLimit(limit).build();
+    }
+
+    private boolean getRateLimit() {
+        String rateLimit = System.getProperty("rateLimit");
+        if (rateLimit == null) rateLimit = System.getenv("rateLimit");
+        return Boolean.parseBoolean(rateLimit);
     }
 }

@@ -3,8 +3,6 @@ package stirling.software.spdf.proprietary.security.configuration;
 import static stirling.software.spdf.proprietary.security.util.ValidationUtil.isCollectionEmpty;
 import static stirling.software.spdf.proprietary.security.util.ValidationUtil.isStringEmpty;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -17,16 +15,12 @@ import java.util.Collection;
 import java.util.List;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.EncodedResource;
 
 import lombok.Data;
 import lombok.Getter;
@@ -47,32 +41,32 @@ import stirling.software.spdf.proprietary.security.model.provider.Provider;
 @Slf4j
 public class ApplicationPropertiesConfiguration {
 
-    @Bean
-    public PropertySource<?> dynamicYamlPropertySource(ConfigurableEnvironment environment)
-            throws IOException {
-        String configPath = InstallationPathConfiguration.getSettingsPath();
-        log.debug("Attempting to load settings from: " + configPath);
-
-        File file = new File(configPath);
-        if (!file.exists()) {
-            log.error("Warning: Settings file does not exist at: " + configPath);
-        }
-
-        Resource resource = new FileSystemResource(configPath);
-        if (!resource.exists()) {
-            throw new FileNotFoundException("Settings file not found at: " + configPath);
-        }
-
-        EncodedResource encodedResource = new EncodedResource(resource);
-        PropertySource<?> propertySource =
-                new YamlPropertySourceFactoryConfiguration()
-                        .createPropertySource(null, encodedResource);
-        environment.getPropertySources().addFirst(propertySource);
-
-        log.debug("Loaded properties: " + propertySource.getSource());
-
-        return propertySource;
-    }
+    //    @Bean
+    //    public PropertySource<?> dynamicYamlPropertySource(ConfigurableEnvironment environment)
+    //            throws IOException {
+    //        String configPath = InstallationPathConfiguration.getSettingsPath();
+    //        log.debug("Attempting to load settings from: " + configPath);
+    //
+    //        File file = new File(configPath);
+    //        if (!file.exists()) {
+    //            log.error("Warning: Settings file does not exist at: " + configPath);
+    //        }
+    //
+    //        Resource resource = new FileSystemResource(configPath);
+    //        if (!resource.exists()) {
+    //            throw new FileNotFoundException("Settings file not found at: " + configPath);
+    //        }
+    //
+    //        EncodedResource encodedResource = new EncodedResource(resource);
+    //        PropertySource<?> propertySource =
+    //                new YamlPropertySourceFactoryConfiguration()
+    //                        .createPropertySource(null, encodedResource);
+    //        environment.getPropertySources().addFirst(propertySource);
+    //
+    //        log.debug("Loaded properties: " + propertySource.getSource());
+    //
+    //        return propertySource;
+    //    }
 
     private Legal legal = new Legal();
     private Security security = new Security();

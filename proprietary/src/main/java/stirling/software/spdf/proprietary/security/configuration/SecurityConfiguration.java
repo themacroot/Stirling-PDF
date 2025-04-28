@@ -36,7 +36,7 @@ import stirling.software.spdf.proprietary.security.CustomLogoutSuccessHandler;
 import stirling.software.spdf.proprietary.security.FirstLoginFilter;
 import stirling.software.spdf.proprietary.security.IPRateLimitingFilter;
 import stirling.software.spdf.proprietary.security.UserAuthenticationFilter;
-import stirling.software.spdf.proprietary.security.persistence.User;
+import stirling.software.spdf.proprietary.security.persistence.UserEntity;
 import stirling.software.spdf.proprietary.security.persistence.repository.JPATokenRepositoryImpl;
 import stirling.software.spdf.proprietary.security.persistence.repository.PersistentLoginRepository;
 import stirling.software.spdf.proprietary.security.service.CustomUserDetailsService;
@@ -136,7 +136,7 @@ public class SecurityConfiguration {
                                                     }
                                                     // Validate API key using existing UserService
                                                     try {
-                                                        Optional<User> user =
+                                                        Optional<UserEntity> user =
                                                                 userService.getUserByApiKey(apiKey);
                                                         // If API key is valid, ignore CSRF (return
                                                         // true)

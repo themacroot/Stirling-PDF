@@ -19,7 +19,7 @@ import org.springframework.security.saml2.provider.service.authentication.Saml2A
 
 import lombok.extern.slf4j.Slf4j;
 
-import stirling.software.spdf.proprietary.security.persistence.User;
+import stirling.software.spdf.proprietary.security.persistence.UserEntity;
 import stirling.software.spdf.proprietary.security.service.UserService;
 
 @Slf4j
@@ -86,10 +86,10 @@ public class CustomSaml2ResponseAuthenticationConverter
         }
 
         // Rest of your existing code...
-        Optional<User> userOpt = userService.findByUsernameIgnoreCase(userIdentifier);
+        Optional<UserEntity> userOpt = userService.findByUsernameIgnoreCase(userIdentifier);
         SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority("ROLE_USER");
         if (userOpt.isPresent()) {
-            User user = userOpt.get();
+            UserEntity user = userOpt.get();
             simpleGrantedAuthority =
                     new SimpleGrantedAuthority(userService.findRole(user).getAuthority());
         }

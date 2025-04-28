@@ -17,7 +17,8 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import lombok.extern.slf4j.Slf4j;
 
-import stirling.software.spdf.proprietary.security.persistence.User;
+import stirling.software.spdf.proprietary.security.persistence.UserEntity;
+import stirling.software.spdf.proprietary.security.service.UserService;
 
 @Slf4j
 public class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationFailureHandler {
@@ -54,7 +55,7 @@ public class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationF
         }
 
         String username = request.getParameter("username");
-        Optional<User> optUser = userService.findByUsernameIgnoreCase(username);
+        Optional<UserEntity> optUser = userService.findByUsernameIgnoreCase(username);
 
         if (username != null && optUser.isPresent() && !isDemoUser(optUser)) {
             log.info(
@@ -82,7 +83,7 @@ public class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationF
         super.onAuthenticationFailure(request, response, exception);
     }
 
-    private boolean isDemoUser(Optional<User> user) {
+    private boolean isDemoUser(Optional<UserEntity> user) {
         return user.isPresent()
                 && user.get().getAuthorities().stream()
                         .anyMatch(authority -> "ROLE_DEMO_USER".equals(authority.getAuthority()));

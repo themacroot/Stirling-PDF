@@ -30,7 +30,6 @@ import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
 
-import stirling.software.spdf.proprietary.security.DatabaseInterface;
 import stirling.software.spdf.proprietary.security.configuration.ApplicationPropertiesConfiguration;
 import stirling.software.spdf.proprietary.security.configuration.InstallationPathConfiguration;
 import stirling.software.spdf.proprietary.security.model.FileInfo;
@@ -40,7 +39,7 @@ import stirling.software.spdf.proprietary.security.model.exception.BackupNotFoun
 @Slf4j
 @Service
 @ConditionalOnProperty(name = "premium.proFeatures.database", havingValue = "true")
-public class DatabaseService implements DatabaseInterface {
+public class DatabaseService implements DatabaseServiceInterface {
 
     public static final String BACKUP_PREFIX = "backup_";
     public static final String SQL_SUFFIX = ".sql";

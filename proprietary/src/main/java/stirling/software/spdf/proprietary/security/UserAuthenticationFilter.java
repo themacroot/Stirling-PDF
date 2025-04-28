@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
@@ -27,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import stirling.software.spdf.proprietary.security.configuration.ApplicationPropertiesConfiguration;
 import stirling.software.spdf.proprietary.security.model.ApiKeyAuthenticationToken;
-import stirling.software.spdf.proprietary.security.persistence.User;
+import stirling.software.spdf.proprietary.security.persistence.UserEntity;
 import stirling.software.spdf.proprietary.security.service.UserService;
 import stirling.software.spdf.proprietary.security.session.SessionPersistentRegistry;
 import stirling.software.spdf.proprietary.security.sso.saml2.CustomSaml2AuthenticatedPrincipal;
@@ -44,8 +43,8 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
 
     public UserAuthenticationFilter(
             ApplicationPropertiesConfiguration applicationProperties,
-            @Autowired(required = false) UserService userService,
-            @Autowired(required = false) SessionPersistentRegistry sessionPersistentRegistry,
+            UserService userService,
+            SessionPersistentRegistry sessionPersistentRegistry,
             @Qualifier("loginEnabled") boolean loginEnabledValue) {
         this.applicationProperties = applicationProperties;
         this.userService = userService;
@@ -86,7 +85,7 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
                 try {
                     // Use API key to authenticate. This requires you to have an authentication
                     // provider for API keys.
-                    Optional<User> user = userService.getUserByApiKey(apiKey);
+                    Optional<UserEntity> user = userService.getUserByApiKey(apiKey);
                     if (user.isEmpty()) {
                         response.setStatus(HttpStatus.UNAUTHORIZED.value());
                         response.getWriter().write("Invalid API Key.");

@@ -12,8 +12,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import stirling.software.spdf.proprietary.security.model.Authority;
-import stirling.software.spdf.proprietary.security.persistence.User;
+import stirling.software.spdf.proprietary.security.persistence.AuthorityEntity;
+import stirling.software.spdf.proprietary.security.persistence.UserEntity;
 import stirling.software.spdf.proprietary.security.persistence.repository.UserRepository;
 
 @Service
@@ -32,7 +32,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user =
+        UserEntity user =
                 userRepository
                         .findByUsername(username)
                         .orElseThrow(
@@ -56,7 +56,8 @@ public class CustomUserDetailsService implements UserDetailsService {
                 getAuthorities(user.getAuthorities()));
     }
 
-    private Collection<? extends GrantedAuthority> getAuthorities(Set<Authority> authorities) {
+    private Collection<? extends GrantedAuthority> getAuthorities(
+            Set<AuthorityEntity> authorities) {
         return authorities.stream()
                 .map(authority -> new SimpleGrantedAuthority(authority.getAuthority()))
                 .toList();

@@ -6,17 +6,17 @@ import org.springframework.context.annotation.Conditional;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import stirling.software.spdf.proprietary.security.DatabaseInterface;
 import stirling.software.spdf.proprietary.security.controller.api.H2SQLCondition;
 import stirling.software.spdf.proprietary.security.model.exception.UnsupportedProviderException;
+import stirling.software.spdf.proprietary.security.service.DatabaseServiceInterface;
 
 @Component
 @Conditional(H2SQLCondition.class)
 public class ScheduledTasks {
 
-    private final DatabaseInterface databaseService;
+    private final DatabaseServiceInterface databaseService;
 
-    public ScheduledTasks(DatabaseInterface databaseService) {
+    public ScheduledTasks(DatabaseServiceInterface databaseService) {
         this.databaseService = databaseService;
     }
 

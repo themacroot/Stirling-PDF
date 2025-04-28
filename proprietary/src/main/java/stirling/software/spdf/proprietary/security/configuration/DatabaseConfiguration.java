@@ -3,6 +3,7 @@ package stirling.software.spdf.proprietary.security.configuration;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +16,7 @@ import stirling.software.spdf.proprietary.security.model.exception.UnsupportedPr
 @Slf4j
 @Getter
 @Configuration
+@ConditionalOnProperty(name = "premium.proFeatures.database", havingValue = "true")
 public class DatabaseConfiguration {
 
     public final String DATASOURCE_DEFAULT_URL;
@@ -24,19 +26,18 @@ public class DatabaseConfiguration {
     public static final String DEFAULT_USERNAME = "sa";
     public static final String POSTGRES_DRIVER = "org.postgresql.Driver";
 
-    private final ApplicationPropertiesConfiguration applicationProperties;
-    private final boolean runningProOrHigher;
+    @Qualifier("runningProOrHigher")
+    private final boolean runningProOrHigher = false;
 
-    public DatabaseConfiguration(
-            ApplicationPropertiesConfiguration applicationProperties,
-            @Qualifier("runningProOrHigher") boolean runningProOrHigher) {
+    private final ApplicationPropertiesConfiguration applicationProperties;
+
+    public DatabaseConfiguration(ApplicationPropertiesConfiguration applicationProperties) {
         DATASOURCE_DEFAULT_URL =
                 "jdbc:h2:file:"
                         + InstallationPathConfiguration.getConfigPath()
-                        + "stirling-pdf-DB-2.3.232;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE";
+                        + "stirling-pdf-DB-2.3.232;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL";
         log.debug("Database URL: {}", DATASOURCE_DEFAULT_URL);
         this.applicationProperties = applicationProperties;
-        this.runningProOrHigher = runningProOrHigher;
     }
 
     /**
@@ -57,31 +58,31 @@ public class DatabaseConfiguration {
         }
 
         ApplicationPropertiesConfiguration.System system = applicationProperties.getSystem();
-        ApplicationPropertiesConfiguration.Datasource datasource = system.getDatasource();
+        ApplicationPropertiesConfiguration.Datasource datasourceProps = system.getDatasource();
 
-        if (!datasource.isEnableCustomDatabase()) {
+        if (!datasourceProps.isEnableCustomDatabase()) {
             return useDefaultDataSource(dataSourceBuilder);
         }
 
         log.info("Using custom database configuration");
 
-        if (!datasource.getCustomDatabaseUrl().isBlank()) {
-            if (datasource.getCustomDatabaseUrl().contains("postgresql")) {
+        if (!datasourceProps.getCustomDatabaseUrl().isBlank()) {
+            if (datasourceProps.getCustomDatabaseUrl().contains("postgresql")) {
                 dataSourceBuilder.driverClassName(POSTGRES_DRIVER);
             }
 
-            dataSourceBuilder.url(datasource.getCustomDatabaseUrl());
+            dataSourceBuilder.url(datasourceProps.getCustomDatabaseUrl());
         } else {
-            dataSourceBuilder.driverClassName(getDriverClassName(datasource.getType()));
+            dataSourceBuilder.driverClassName(getDriverClassName(datasourceProps.getType()));
             dataSourceBuilder.url(
                     generateCustomDataSourceUrl(
-                            datasource.getType(),
-                            datasource.getHostName(),
-                            datasource.getPort(),
-                            datasource.getName()));
+                            datasourceProps.getType(),
+                            datasourceProps.getHostName(),
+                            datasourceProps.getPort(),
+                            datasourceProps.getName()));
         }
-        dataSourceBuilder.username(datasource.getUsername());
-        dataSourceBuilder.password(datasource.getPassword());
+        dataSourceBuilder.username(datasourceProps.getUsername());
+        dataSourceBuilder.password(datasourceProps.getPassword());
 
         return dataSourceBuilder.build();
     }

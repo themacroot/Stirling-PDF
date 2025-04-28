@@ -14,7 +14,7 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import lombok.extern.slf4j.Slf4j;
 
 import stirling.software.spdf.proprietary.security.model.enumeration.UsernameAttribute;
-import stirling.software.spdf.proprietary.security.persistence.User;
+import stirling.software.spdf.proprietary.security.persistence.UserEntity;
 import stirling.software.spdf.proprietary.security.service.LoginAttemptService;
 import stirling.software.spdf.proprietary.security.service.UserService;
 
@@ -44,7 +44,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OidcUserReques
             String usernameAttributeKey = usernameAttribute.getName();
 
             // todo: save user by OIDC ID instead of username
-            Optional<User> internalUser =
+            Optional<UserEntity> internalUser =
                     userService.findByUsernameIgnoreCase(user.getAttribute(usernameAttributeKey));
 
             if (internalUser.isPresent()) {

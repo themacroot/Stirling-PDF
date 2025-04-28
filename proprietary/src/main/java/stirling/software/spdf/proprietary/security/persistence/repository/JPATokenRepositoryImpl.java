@@ -8,7 +8,7 @@ import org.springframework.security.web.authentication.rememberme.PersistentReme
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 import org.springframework.transaction.annotation.Transactional;
 
-import stirling.software.spdf.proprietary.security.model.PersistentLoginEntity;
+import stirling.software.spdf.proprietary.security.persistence.PersistentLoginEntity;
 
 @ConditionalOnProperty(name = "premium.proFeatures.database", havingValue = "true")
 public class JPATokenRepositoryImpl implements PersistentTokenRepository {

@@ -32,13 +32,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
 import stirling.software.spdf.proprietary.security.configuration.ApplicationPropertiesConfiguration;
-import stirling.software.spdf.proprietary.security.model.Authority;
 import stirling.software.spdf.proprietary.security.model.enumeration.Role;
 import stirling.software.spdf.proprietary.security.model.provider.GitHubProvider;
 import stirling.software.spdf.proprietary.security.model.provider.GoogleProvider;
 import stirling.software.spdf.proprietary.security.model.provider.KeycloakProvider;
+import stirling.software.spdf.proprietary.security.persistence.AuthorityEntity;
 import stirling.software.spdf.proprietary.security.persistence.SessionEntity;
-import stirling.software.spdf.proprietary.security.persistence.User;
+import stirling.software.spdf.proprietary.security.persistence.UserEntity;
 import stirling.software.spdf.proprietary.security.persistence.repository.UserRepository;
 import stirling.software.spdf.proprietary.security.session.SessionPersistentRegistry;
 import stirling.software.spdf.proprietary.security.sso.saml2.CustomSaml2AuthenticatedPrincipal;
@@ -211,8 +211,8 @@ public class AccountWebController {
     @GetMapping("/adminSettings")
     public String showAddUserForm(
             HttpServletRequest request, Model model, Authentication authentication) {
-        List<User> allUsers = userRepository.findAll();
-        Iterator<User> iterator = allUsers.iterator();
+        List<UserEntity> allUsers = userRepository.findAll();
+        Iterator<UserEntity> iterator = allUsers.iterator();
         Map<String, String> roleDetails = Role.getAllRoleDetails();
         // Map to store session information and user activity status
         Map<String, Boolean> userSessions = new HashMap<>();
@@ -220,9 +220,9 @@ public class AccountWebController {
         int activeUsers = 0;
         int disabledUsers = 0;
         while (iterator.hasNext()) {
-            User user = iterator.next();
+            UserEntity user = iterator.next();
             if (user != null) {
-                for (Authority authority : user.getAuthorities()) {
+                for (AuthorityEntity authority : user.getAuthorities()) {
                     if (authority.getAuthority().equals(Role.INTERNAL_API_USER.getRoleId())) {
                         iterator.remove();
                         roleDetails.remove(Role.INTERNAL_API_USER.getRoleId());
@@ -266,7 +266,7 @@ public class AccountWebController {
             }
         }
         // Sort users by active status and last request date
-        List<User> sortedUsers =
+        List<UserEntity> sortedUsers =
                 allUsers.stream()
                         .sorted(
                                 (u1, u2) -> {
@@ -361,7 +361,8 @@ public class AccountWebController {
             }
             if (username != null) {
                 // Fetch user details from the database
-                Optional<User> user = userRepository.findByUsernameIgnoreCaseWithSettings(username);
+                Optional<UserEntity> user =
+                        userRepository.findByUsernameIgnoreCaseWithSettings(username);
 
                 if (user.isEmpty()) {
                     return "redirect:/error";
@@ -413,7 +414,7 @@ public class AccountWebController {
             if (principal instanceof UserDetails detailsUser) {
                 String username = detailsUser.getUsername();
                 // Fetch user details from the database
-                Optional<User> user = userRepository.findByUsernameIgnoreCase(username);
+                Optional<UserEntity> user = userRepository.findByUsernameIgnoreCase(username);
                 if (user.isEmpty()) {
                     // Handle error appropriately, example redirection in case of error
                     return "redirect:/error";
