@@ -14,6 +14,7 @@ import stirling.software.SPDF.config.interfaces.DatabaseInterface;
 import stirling.software.SPDF.model.Role;
 import stirling.software.common.model.ApplicationProperties;
 import stirling.software.common.model.exception.UnsupportedProviderException;
+import stirling.software.common.service.UserService;
 
 @Slf4j
 @Component

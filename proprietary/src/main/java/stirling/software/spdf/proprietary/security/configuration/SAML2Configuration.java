@@ -23,6 +23,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import lombok.extern.slf4j.Slf4j;
 
+import stirling.software.common.model.ApplicationProperties;
 import stirling.software.spdf.proprietary.security.util.CertificateUtil;
 
 @Configuration
@@ -30,16 +31,16 @@ import stirling.software.spdf.proprietary.security.util.CertificateUtil;
 @ConditionalOnProperty(value = "security.saml2.enabled", havingValue = "true")
 public class SAML2Configuration {
 
-    private final ApplicationPropertiesConfiguration applicationProperties;
+    private final ApplicationProperties applicationProperties;
 
-    public SAML2Configuration(ApplicationPropertiesConfiguration applicationProperties) {
+    public SAML2Configuration(ApplicationProperties applicationProperties) {
         this.applicationProperties = applicationProperties;
     }
 
     @Bean
     @ConditionalOnProperty(name = "security.saml2.enabled", havingValue = "true")
     public RelyingPartyRegistrationRepository relyingPartyRegistrations() throws Exception {
-        ApplicationPropertiesConfiguration.Security.SAML2 samlConf =
+        ApplicationProperties.Security.SAML2 samlConf =
                 applicationProperties.getSecurity().getSaml2();
         X509Certificate idpCert = CertificateUtil.readCertificate(samlConf.getIdpCert());
         Saml2X509Credential verificationCredential = Saml2X509Credential.verification(idpCert);

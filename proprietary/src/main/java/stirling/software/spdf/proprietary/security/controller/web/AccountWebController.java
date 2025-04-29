@@ -1,6 +1,6 @@
 package stirling.software.spdf.proprietary.security.controller.web;
 
-import static stirling.software.spdf.proprietary.security.util.ValidationUtil.validateProvider;
+import static stirling.software.common.util.ValidationUtil.validateProvider;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -31,11 +31,11 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import lombok.extern.slf4j.Slf4j;
 
-import stirling.software.spdf.proprietary.security.configuration.ApplicationPropertiesConfiguration;
+import stirling.software.common.model.ApplicationProperties;
+import stirling.software.common.model.provider.GitHubProvider;
+import stirling.software.common.model.provider.GoogleProvider;
+import stirling.software.common.model.provider.KeycloakProvider;
 import stirling.software.spdf.proprietary.security.model.enumeration.Role;
-import stirling.software.spdf.proprietary.security.model.provider.GitHubProvider;
-import stirling.software.spdf.proprietary.security.model.provider.GoogleProvider;
-import stirling.software.spdf.proprietary.security.model.provider.KeycloakProvider;
 import stirling.software.spdf.proprietary.security.persistence.AuthorityEntity;
 import stirling.software.spdf.proprietary.security.persistence.SessionEntity;
 import stirling.software.spdf.proprietary.security.persistence.UserEntity;
@@ -51,14 +51,14 @@ public class AccountWebController {
 
     public static final String OAUTH_2_AUTHORIZATION = "/oauth2/authorization/";
 
-    private final ApplicationPropertiesConfiguration applicationProperties;
+    private final ApplicationProperties applicationProperties;
     private final SessionPersistentRegistry sessionPersistentRegistry;
     // Assuming you have a repository for user operations
     private final UserRepository userRepository;
     private final boolean runningEE;
 
     public AccountWebController(
-            ApplicationPropertiesConfiguration applicationProperties,
+            ApplicationProperties applicationProperties,
             @Autowired(required = false) SessionPersistentRegistry sessionPersistentRegistry,
             @Autowired(required = false) UserRepository userRepository,
             @Qualifier("runningEE") boolean runningEE) {
@@ -76,9 +76,9 @@ public class AccountWebController {
         }
 
         Map<String, String> providerList = new HashMap<>();
-        ApplicationPropertiesConfiguration.Security securityProps =
+        ApplicationProperties.Security securityProps =
                 applicationProperties.getSecurity();
-        ApplicationPropertiesConfiguration.Security.OAUTH2 oauth = securityProps.getOauth2();
+        ApplicationProperties.Security.OAUTH2 oauth = securityProps.getOauth2();
 
         if (oauth != null) {
             if (oauth.getEnabled()) {
@@ -89,7 +89,7 @@ public class AccountWebController {
                     providerList.put(OAUTH_2_AUTHORIZATION + oauth.getProvider(), clientName);
                 }
 
-                ApplicationPropertiesConfiguration.Security.OAUTH2.Client client =
+                ApplicationProperties.Security.OAUTH2.Client client =
                         oauth.getClient();
 
                 if (client != null) {
@@ -118,7 +118,7 @@ public class AccountWebController {
             }
         }
 
-        ApplicationPropertiesConfiguration.Security.SAML2 saml2 = securityProps.getSaml2();
+        ApplicationProperties.Security.SAML2 saml2 = securityProps.getSaml2();
 
         if (securityProps.isSaml2Active()
                 && applicationProperties.getSystem().getEnableAlphaFunctionality()

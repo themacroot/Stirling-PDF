@@ -33,7 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import stirling.software.SPDF.model.api.general.MergePdfsRequest;
 import stirling.software.SPDF.service.CustomPDFDocumentFactory;
-import stirling.software.SPDF.utils.GeneralUtils;
+import stirling.software.common.util.GeneralUtil;
 import stirling.software.SPDF.utils.WebResponseUtils;
 
 @RestController
@@ -137,7 +137,7 @@ public class MergeController {
             for (MultipartFile multipartFile : files) {
                 totalSize += multipartFile.getSize();
                 File tempFile =
-                        GeneralUtils.convertMultipartFileToFile(
+                        GeneralUtil.convertMultipartFileToFile(
                                 multipartFile); // Convert MultipartFile to File
                 filesToDelete.add(tempFile); // Add temp file to the list for later deletion
                 mergerUtility.addSource(tempFile); // Add source file to the merger utility

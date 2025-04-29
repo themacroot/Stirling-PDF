@@ -35,6 +35,7 @@ import stirling.software.SPDF.model.api.converters.ConvertToPdfRequest;
 import stirling.software.SPDF.service.CustomPDFDocumentFactory;
 import stirling.software.SPDF.utils.*;
 import stirling.software.SPDF.utils.ProcessExecutor.ProcessExecutorResult;
+import stirling.software.common.util.GeneralUtil;
 
 @RestController
 @RequestMapping("/api/v1/convert")
@@ -247,7 +248,7 @@ public class ConvertImgPDFController {
         // Load the input PDF
         PDDocument document = pdfDocumentFactory.load(pdfFile);
         int totalPages = document.getNumberOfPages();
-        List<Integer> newPageOrder = GeneralUtils.parsePageList(pageOrderArr, totalPages, false);
+        List<Integer> newPageOrder = GeneralUtil.parsePageList(pageOrderArr, totalPages, false);
 
         // Create a new list to hold the pages in the new order
         List<PDPage> newPages = new ArrayList<>();

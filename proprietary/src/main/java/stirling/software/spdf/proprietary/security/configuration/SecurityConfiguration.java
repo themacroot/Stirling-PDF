@@ -1,7 +1,6 @@
 package stirling.software.spdf.proprietary.security.configuration;
 
-import java.util.Optional;
-
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -13,7 +12,6 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,31 +19,17 @@ import org.springframework.security.saml2.provider.service.authentication.OpenSa
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository;
 import org.springframework.security.saml2.provider.service.web.authentication.OpenSaml4AuthenticationRequestResolver;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
-import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
-import org.springframework.security.web.savedrequest.NullRequestCache;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-
-import lombok.extern.slf4j.Slf4j;
-
-import stirling.software.spdf.proprietary.security.CustomAuthenticationFailureHandler;
-import stirling.software.spdf.proprietary.security.CustomAuthenticationSuccessHandler;
-import stirling.software.spdf.proprietary.security.CustomLogoutSuccessHandler;
+import stirling.software.common.model.ApplicationProperties;
 import stirling.software.spdf.proprietary.security.FirstLoginFilter;
 import stirling.software.spdf.proprietary.security.IPRateLimitingFilter;
 import stirling.software.spdf.proprietary.security.UserAuthenticationFilter;
-import stirling.software.spdf.proprietary.security.persistence.UserEntity;
 import stirling.software.spdf.proprietary.security.persistence.repository.JPATokenRepositoryImpl;
 import stirling.software.spdf.proprietary.security.persistence.repository.PersistentLoginRepository;
 import stirling.software.spdf.proprietary.security.service.CustomUserDetailsService;
 import stirling.software.spdf.proprietary.security.service.LoginAttemptService;
 import stirling.software.spdf.proprietary.security.service.UserService;
 import stirling.software.spdf.proprietary.security.session.SessionPersistentRegistry;
-import stirling.software.spdf.proprietary.security.sso.oauth2.CustomOAuth2AuthenticationFailureHandler;
-import stirling.software.spdf.proprietary.security.sso.oauth2.CustomOAuth2AuthenticationSuccessHandler;
-import stirling.software.spdf.proprietary.security.sso.oauth2.CustomOAuth2UserService;
 import stirling.software.spdf.proprietary.security.sso.saml2.CustomSaml2AuthenticationFailureHandler;
 import stirling.software.spdf.proprietary.security.sso.saml2.CustomSaml2AuthenticationSuccessHandler;
 import stirling.software.spdf.proprietary.security.sso.saml2.CustomSaml2ResponseAuthenticationConverter;
@@ -62,7 +46,7 @@ public class SecurityConfiguration {
     private final boolean loginEnabledValue;
     private final boolean runningProOrHigher;
 
-    private final ApplicationPropertiesConfiguration applicationPropertiesConfiguration;
+    private final ApplicationProperties applicationProperties;
     private final UserAuthenticationFilter userAuthenticationFilter;
     private final LoginAttemptService loginAttemptService;
     private final FirstLoginFilter firstLoginFilter;
@@ -78,7 +62,7 @@ public class SecurityConfiguration {
             @Lazy @Autowired(required = false) UserService userService,
             @Qualifier("loginEnabled") boolean loginEnabledValue,
             @Qualifier("runningProOrHigher") boolean runningProOrHigher,
-            ApplicationPropertiesConfiguration applicationPropertiesConfiguration,
+            ApplicationProperties applicationProperties,
             @Lazy @Autowired(required = false) UserAuthenticationFilter userAuthenticationFilter,
             LoginAttemptService loginAttemptService,
             @Lazy @Autowired(required = false) FirstLoginFilter firstLoginFilter,
@@ -92,7 +76,7 @@ public class SecurityConfiguration {
         this.userService = userService;
         this.loginEnabledValue = loginEnabledValue;
         this.runningProOrHigher = runningProOrHigher;
-        this.applicationPropertiesConfiguration = applicationPropertiesConfiguration;
+        this.applicationProperties = applicationProperties;
         this.userAuthenticationFilter = userAuthenticationFilter;
         this.loginAttemptService = loginAttemptService;
         this.firstLoginFilter = firstLoginFilter;
@@ -110,172 +94,14 @@ public class SecurityConfiguration {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        if (applicationPropertiesConfiguration.getSecurity().getCsrfDisabled()
+        if (applicationProperties.getSecurity().getCsrfDisabled()
                 || !loginEnabledValue) {
             http.csrf(csrf -> csrf.disable());
         }
 
         if (loginEnabledValue) {
-            http.addFilterBefore(
-                    userAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-            if (!applicationPropertiesConfiguration.getSecurity().getCsrfDisabled()) {
-                CookieCsrfTokenRepository cookieRepo =
-                        CookieCsrfTokenRepository.withHttpOnlyFalse();
-                CsrfTokenRequestAttributeHandler requestHandler =
-                        new CsrfTokenRequestAttributeHandler();
-                requestHandler.setCsrfRequestAttributeName(null);
-                http.csrf(
-                        csrf ->
-                                csrf.ignoringRequestMatchers(
-                                                request -> {
-                                                    String apiKey = request.getHeader("X-API-KEY");
-                                                    // If there's no API key, don't ignore CSRF
-                                                    // (return false)
-                                                    if (apiKey == null || apiKey.trim().isEmpty()) {
-                                                        return false;
-                                                    }
-                                                    // Validate API key using existing UserService
-                                                    try {
-                                                        Optional<UserEntity> user =
-                                                                userService.getUserByApiKey(apiKey);
-                                                        // If API key is valid, ignore CSRF (return
-                                                        // true)
-                                                        // If API key is invalid, don't ignore CSRF
-                                                        // (return false)
-                                                        return user.isPresent();
-                                                    } catch (Exception e) {
-                                                        // If there's any error validating the API
-                                                        // key, don't ignore CSRF
-                                                        return false;
-                                                    }
-                                                })
-                                        .csrfTokenRepository(cookieRepo)
-                                        .csrfTokenRequestHandler(requestHandler));
-            }
-            http.addFilterBefore(rateLimitingFilter(), UsernamePasswordAuthenticationFilter.class);
-            http.addFilterAfter(firstLoginFilter, UsernamePasswordAuthenticationFilter.class);
-            http.sessionManagement(
-                    sessionManagement ->
-                            sessionManagement
-                                    .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                                    .maximumSessions(10)
-                                    .maxSessionsPreventsLogin(false)
-                                    .sessionRegistry(sessionRegistry)
-                                    .expiredUrl("/login?logout=true"));
-            http.authenticationProvider(daoAuthenticationProvider());
-            http.requestCache(requestCache -> requestCache.requestCache(new NullRequestCache()));
-            http.logout(
-                    logout ->
-                            logout.logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-                                    .logoutSuccessHandler(
-                                            new CustomLogoutSuccessHandler(
-                                                    applicationPropertiesConfiguration))
-                                    .clearAuthentication(true)
-                                    .invalidateHttpSession(true)
-                                    .deleteCookies("JSESSIONID", "remember-me"));
-            http.rememberMe(
-                    rememberMeConfigurer -> // Use the configurator directly
-                    rememberMeConfigurer
-                                    .tokenRepository(persistentTokenRepository())
-                                    .tokenValiditySeconds( // 14 days
-                                            14 * 24 * 60 * 60)
-                                    .userDetailsService( // Your existing UserDetailsService
-                                            userDetailsService)
-                                    .useSecureCookie( // Enable secure cookie
-                                            true)
-                                    .rememberMeParameter( // Form parameter name
-                                            "remember-me")
-                                    .rememberMeCookieName( // Cookie name
-                                            "remember-me")
-                                    .alwaysRemember(false));
-            http.authorizeHttpRequests(
-                    authz ->
-                            authz.requestMatchers(
-                                            req -> {
-                                                String uri = req.getRequestURI();
-                                                String contextPath = req.getContextPath();
-                                                // Remove the context path from the URI
-                                                String trimmedUri =
-                                                        uri.startsWith(contextPath)
-                                                                ? uri.substring(
-                                                                        contextPath.length())
-                                                                : uri;
-                                                return trimmedUri.startsWith("/login")
-                                                        || trimmedUri.startsWith("/oauth")
-                                                        || trimmedUri.startsWith("/saml2")
-                                                        || trimmedUri.endsWith(".svg")
-                                                        || trimmedUri.startsWith("/register")
-                                                        || trimmedUri.startsWith("/error")
-                                                        || trimmedUri.startsWith("/images/")
-                                                        || trimmedUri.startsWith("/public/")
-                                                        || trimmedUri.startsWith("/css/")
-                                                        || trimmedUri.startsWith("/fonts/")
-                                                        || trimmedUri.startsWith("/js/")
-                                                        || trimmedUri.startsWith(
-                                                                "/api/v1/info/status");
-                                            })
-                                    .permitAll()
-                                    .anyRequest()
-                                    .authenticated());
-            // Handle User/Password Logins
-            if (applicationPropertiesConfiguration.getSecurity().isUserPass()) {
-                http.formLogin(
-                        formLogin ->
-                                formLogin
-                                        .loginPage("/login")
-                                        .successHandler(
-                                                new CustomAuthenticationSuccessHandler(
-                                                        loginAttemptService, userService))
-                                        .failureHandler(
-                                                new CustomAuthenticationFailureHandler(
-                                                        loginAttemptService, userService))
-                                        .defaultSuccessUrl("/")
-                                        .permitAll());
-            }
-            // Handle OAUTH2 Logins
-            if (applicationPropertiesConfiguration.getSecurity().isOauth2Active()) {
-                http.oauth2Login(
-                        oauth2 ->
-                                oauth2.loginPage("/oauth2")
-                                        .
-                                        /*
-                                        This Custom handler is used to check if the OAUTH2 user trying to log in, already exists in the database.
-                                        If user exists, login proceeds as usual. If user does not exist, then it is auto-created but only if 'OAUTH2AutoCreateUser'
-                                        is set as true, else login fails with an error message advising the same.
-                                         */
-                                        successHandler(
-                                                new CustomOAuth2AuthenticationSuccessHandler(
-                                                        applicationPropertiesConfiguration
-                                                                .getSecurity()
-                                                                .getOauth2()
-                                                                .getAutoCreateUser(),
-                                                        applicationPropertiesConfiguration
-                                                                .getSecurity()
-                                                                .getOauth2()
-                                                                .getBlockRegistration(),
-                                                        loginAttemptService,
-                                                        userService))
-                                        .failureHandler(
-                                                new CustomOAuth2AuthenticationFailureHandler())
-                                        . // Add existing Authorities from the database
-                                        userInfoEndpoint(
-                                                userInfoEndpoint ->
-                                                        userInfoEndpoint
-                                                                .oidcUserService(
-                                                                        new CustomOAuth2UserService(
-                                                                                applicationPropertiesConfiguration
-                                                                                        .getSecurity()
-                                                                                        .getOauth2()
-                                                                                        .getUseAsUsername()
-                                                                                        .toUpperCase(),
-                                                                                userService,
-                                                                                loginAttemptService))
-                                                                .userAuthoritiesMapper(
-                                                                        oAuth2userAuthoritiesMapper))
-                                        .permitAll());
-            }
             // Handle SAML
-            if (applicationPropertiesConfiguration.getSecurity().isSaml2Active()
+            if (applicationProperties.getSecurity().isSaml2Active()
                     && runningProOrHigher) {
                 // Configure the authentication provider
                 OpenSaml4AuthenticationProvider authenticationProvider =
@@ -293,11 +119,11 @@ public class SecurityConfiguration {
                                                         new ProviderManager(authenticationProvider))
                                                 .successHandler(
                                                         new CustomSaml2AuthenticationSuccessHandler(
-                                                                applicationPropertiesConfiguration
+                                                                applicationProperties
                                                                         .getSecurity()
                                                                         .getSaml2()
                                                                         .getAutoCreateUser(),
-                                                                applicationPropertiesConfiguration
+                                                                applicationProperties
                                                                         .getSecurity()
                                                                         .getSaml2()
                                                                         .getBlockRegistration(),

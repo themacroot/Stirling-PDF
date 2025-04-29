@@ -1,14 +1,12 @@
 package stirling.software.spdf.proprietary.security.service;
 
 import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
-import stirling.software.spdf.proprietary.security.configuration.ApplicationPropertiesConfiguration;
+import stirling.software.common.model.ApplicationProperties;
 import stirling.software.spdf.proprietary.security.model.AdminInterface;
 import stirling.software.spdf.proprietary.security.persistence.UserEntity;
 import stirling.software.spdf.proprietary.security.persistence.repository.UserRepository;
@@ -19,11 +17,11 @@ class AppUpdateAuthService implements AdminInterface {
 
     private final UserRepository userRepository;
 
-    private final ApplicationPropertiesConfiguration applicationProperties;
+    private final ApplicationProperties applicationProperties;
 
     public AppUpdateAuthService(
             @Autowired(required = false) UserRepository userRepository,
-            ApplicationPropertiesConfiguration applicationProperties) {
+            ApplicationProperties applicationProperties) {
         this.userRepository = userRepository;
         this.applicationProperties = applicationProperties;
     }

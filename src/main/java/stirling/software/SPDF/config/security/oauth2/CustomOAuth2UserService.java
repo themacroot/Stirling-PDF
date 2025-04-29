@@ -14,7 +14,7 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import lombok.extern.slf4j.Slf4j;
 
 import stirling.software.SPDF.config.security.LoginAttemptService;
-import stirling.software.SPDF.config.security.UserService;
+import stirling.software.common.service.UserService;
 import stirling.software.SPDF.model.User;
 import stirling.software.common.model.ApplicationProperties;
 import stirling.software.common.model.ApplicationProperties.Security.OAUTH2;

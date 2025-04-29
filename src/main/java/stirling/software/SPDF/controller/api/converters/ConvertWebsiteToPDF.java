@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import stirling.software.SPDF.config.RuntimePathConfig;
 import stirling.software.SPDF.model.api.converters.UrlToPdfRequest;
 import stirling.software.SPDF.service.CustomPDFDocumentFactory;
-import stirling.software.SPDF.utils.GeneralUtils;
+import stirling.software.common.util.GeneralUtil;
 import stirling.software.SPDF.utils.ProcessExecutor;
 import stirling.software.SPDF.utils.ProcessExecutor.ProcessExecutorResult;
 import stirling.software.SPDF.utils.WebResponseUtils;
@@ -53,12 +53,12 @@ public class ConvertWebsiteToPDF {
             throw new IllegalArgumentException("This endpoint has been disabled by the admin.");
         }
         // Validate the URL format
-        if (!URL.matches("^https?://.*") || !GeneralUtils.isValidURL(URL)) {
+        if (!URL.matches("^https?://.*") || !GeneralUtil.isValidURL(URL)) {
             throw new IllegalArgumentException("Invalid URL format provided.");
         }
 
         // validate the URL is reachable
-        if (!GeneralUtils.isURLReachable(URL)) {
+        if (!GeneralUtil.isURLReachable(URL)) {
             throw new IllegalArgumentException("URL is not reachable, please provide a valid URL.");
         }
 

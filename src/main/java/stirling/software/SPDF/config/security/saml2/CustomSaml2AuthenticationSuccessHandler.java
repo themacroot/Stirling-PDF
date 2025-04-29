@@ -17,8 +17,8 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import stirling.software.SPDF.config.security.LoginAttemptService;
-import stirling.software.SPDF.config.security.UserService;
-import stirling.software.SPDF.model.AuthenticationType;
+import stirling.software.common.service.UserService;
+import stirling.software.common.model.enumeration.AuthenticationType;
 import stirling.software.SPDF.utils.RequestUriUtils;
 import stirling.software.common.model.ApplicationProperties;
 import stirling.software.common.model.ApplicationProperties.Security.SAML2;

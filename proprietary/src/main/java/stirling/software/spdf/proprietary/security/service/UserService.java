@@ -45,7 +45,6 @@ import stirling.software.spdf.proprietary.security.sso.saml2.CustomSaml2Authenti
 @Lazy
 @Slf4j
 @Service
-@ConditionalOnProperty(name = "premium.enabled", havingValue = "true")
 public class UserService implements UserServiceInterface {
 
     private final UserRepository userRepository;

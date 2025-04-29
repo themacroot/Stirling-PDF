@@ -1,8 +1,7 @@
-package stirling.software.spdf.proprietary.security.util;
+package stirling.software.common.util;
 
 import java.util.Collection;
-
-import stirling.software.spdf.proprietary.security.model.provider.Provider;
+import stirling.software.common.model.provider.Provider;
 
 public class ValidationUtil {
 

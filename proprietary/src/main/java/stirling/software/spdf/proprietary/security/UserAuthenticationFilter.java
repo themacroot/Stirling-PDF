@@ -24,7 +24,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import lombok.extern.slf4j.Slf4j;
 
-import stirling.software.spdf.proprietary.security.configuration.ApplicationPropertiesConfiguration;
+import stirling.software.common.model.ApplicationProperties;
 import stirling.software.spdf.proprietary.security.model.ApiKeyAuthenticationToken;
 import stirling.software.spdf.proprietary.security.persistence.UserEntity;
 import stirling.software.spdf.proprietary.security.service.UserService;
@@ -36,13 +36,13 @@ import stirling.software.spdf.proprietary.security.sso.saml2.CustomSaml2Authenti
 @ConditionalOnProperty(name = "premium.enabled", havingValue = "true")
 public class UserAuthenticationFilter extends OncePerRequestFilter {
 
-    private final ApplicationPropertiesConfiguration applicationProperties;
+    private final ApplicationProperties applicationProperties;
     private final UserService userService;
     private final SessionPersistentRegistry sessionPersistentRegistry;
     private final boolean loginEnabledValue;
 
     public UserAuthenticationFilter(
-            ApplicationPropertiesConfiguration applicationProperties,
+            ApplicationProperties applicationProperties,
             UserService userService,
             SessionPersistentRegistry sessionPersistentRegistry,
             @Qualifier("loginEnabled") boolean loginEnabledValue) {
@@ -133,7 +133,7 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
         // Check if the authenticated user is disabled and invalidate their session if so
         if (authentication != null && authentication.isAuthenticated()) {
 
-            ApplicationPropertiesConfiguration.Security securityProp =
+            ApplicationProperties.Security securityProp =
                     applicationProperties.getSecurity();
             LoginMethod loginMethod = LoginMethod.UNKNOWN;
 
@@ -148,12 +148,12 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
             } else if (principal instanceof OAuth2User oAuth2User) {
                 username = oAuth2User.getName();
                 loginMethod = LoginMethod.OAUTH2USER;
-                ApplicationPropertiesConfiguration.Security.OAUTH2 oAuth = securityProp.getOauth2();
+                ApplicationProperties.Security.OAUTH2 oAuth = securityProp.getOauth2();
                 blockRegistration = oAuth != null && oAuth.getBlockRegistration();
             } else if (principal instanceof CustomSaml2AuthenticatedPrincipal saml2User) {
                 username = saml2User.name();
                 loginMethod = LoginMethod.SAML2USER;
-                ApplicationPropertiesConfiguration.Security.SAML2 saml2 = securityProp.getSaml2();
+                ApplicationProperties.Security.SAML2 saml2 = securityProp.getSaml2();
                 blockRegistration = saml2 != null && saml2.getBlockRegistration();
             } else if (principal instanceof String stringUser) {
                 username = stringUser;

@@ -1,20 +1,16 @@
 package stirling.software.spdf.proprietary.security.ee;
 
-import static stirling.software.spdf.proprietary.security.ee.KeygenLicenseVerifier.*;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-
-import lombok.extern.slf4j.Slf4j;
-
-import stirling.software.spdf.proprietary.security.configuration.ApplicationPropertiesConfiguration;
-import stirling.software.spdf.proprietary.security.util.GeneralUtil;
+import stirling.software.common.model.ApplicationProperties;
+import stirling.software.common.util.GeneralUtil;
+import static stirling.software.spdf.proprietary.security.ee.KeygenLicenseVerifier.License;
 
 @Component
 @Slf4j
@@ -24,14 +20,14 @@ public class LicenseKeyChecker {
 
     private final KeygenLicenseVerifier licenseService;
 
-    private final ApplicationPropertiesConfiguration applicationProperties;
+    private final ApplicationProperties applicationProperties;
 
     private License premiumEnabledResult = License.NORMAL;
 
     @Autowired
     public LicenseKeyChecker(
             KeygenLicenseVerifier licenseService,
-            ApplicationPropertiesConfiguration applicationProperties) {
+            ApplicationProperties applicationProperties) {
         this.licenseService = licenseService;
         this.applicationProperties = applicationProperties;
         this.checkLicense();

@@ -36,6 +36,7 @@ import io.github.pixee.security.Filenames;
 import lombok.extern.slf4j.Slf4j;
 
 import stirling.software.SPDF.service.CustomPDFDocumentFactory;
+import stirling.software.common.util.GeneralUtil;
 
 @Slf4j
 public class PdfUtils {
@@ -85,7 +86,7 @@ public class PdfUtils {
     public static boolean hasImages(PDDocument document, String pagesToCheck) throws IOException {
         String[] pageOrderArr = pagesToCheck.split(",");
         List<Integer> pageList =
-                GeneralUtils.parsePageList(pageOrderArr, document.getNumberOfPages());
+                GeneralUtil.parsePageList(pageOrderArr, document.getNumberOfPages());
 
         for (int pageNumber : pageList) {
             PDPage page = document.getPage(pageNumber);
@@ -101,7 +102,7 @@ public class PdfUtils {
             throws IOException {
         String[] pageOrderArr = pageNumbersToCheck.split(",");
         List<Integer> pageList =
-                GeneralUtils.parsePageList(pageOrderArr, document.getNumberOfPages());
+                GeneralUtil.parsePageList(pageOrderArr, document.getNumberOfPages());
 
         for (int pageNumber : pageList) {
             PDPage page = document.getPage(pageNumber);

@@ -1,4 +1,4 @@
-package stirling.software.SPDF.utils;
+package stirling.software.common.util;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -27,11 +27,11 @@ import io.github.pixee.security.Urls;
 
 import lombok.extern.slf4j.Slf4j;
 
-import stirling.software.SPDF.config.YamlHelper;
+import stirling.software.common.configuration.YamlHelper;
 import stirling.software.common.configuration.InstallationPathConfig;
 
 @Slf4j
-public class GeneralUtils {
+public class GeneralUtil {
 
     public static File convertMultipartFileToFile(MultipartFile multipartFile) throws IOException {
         File tempFile = Files.createTempFile("temp", null).toFile();

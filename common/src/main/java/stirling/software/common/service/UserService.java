@@ -1,4 +1,4 @@
-package stirling.software.SPDF.config.security;
+package stirling.software.common.service;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -12,7 +12,6 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -30,17 +29,16 @@ import stirling.software.SPDF.config.interfaces.DatabaseInterface;
 import stirling.software.SPDF.config.security.saml2.CustomSaml2AuthenticatedPrincipal;
 import stirling.software.SPDF.config.security.session.SessionPersistentRegistry;
 import stirling.software.SPDF.controller.api.pipeline.UserServiceInterface;
-import stirling.software.SPDF.model.AuthenticationType;
-import stirling.software.SPDF.model.Authority;
-import stirling.software.SPDF.model.Role;
-import stirling.software.SPDF.model.User;
 import stirling.software.SPDF.repository.AuthorityRepository;
-import stirling.software.SPDF.repository.UserRepository;
 import stirling.software.common.model.ApplicationProperties;
+import stirling.software.common.model.Authority;
+import stirling.software.common.model.enumeration.AuthenticationType;
+import stirling.software.common.model.enumeration.Role;
 import stirling.software.common.model.exception.UnsupportedProviderException;
+import stirling.software.common.repository.UserRepository;
 
-@Service
 @Slf4j
+@Service
 @RequiredArgsConstructor
 public class UserService implements UserServiceInterface {
 
@@ -54,7 +52,7 @@ public class UserService implements UserServiceInterface {
 
     private final SessionPersistentRegistry sessionRegistry;
 
-    @Lazy private final DatabaseInterface databaseService;
+    private final DatabaseInterface databaseService;
 
     private final ApplicationProperties.Security.OAUTH2 oAuth2;
 

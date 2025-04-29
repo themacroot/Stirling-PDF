@@ -1,26 +1,22 @@
 package stirling.software.spdf.proprietary.security.ee;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.posthog.java.shaded.org.json.JSONException;
+import com.posthog.java.shaded.org.json.JSONObject;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Base64;
-
+import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.crypto.params.Ed25519PublicKeyParameters;
 import org.bouncycastle.crypto.signers.Ed25519Signer;
 import org.bouncycastle.util.encoders.Hex;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.posthog.java.shaded.org.json.JSONException;
-import com.posthog.java.shaded.org.json.JSONObject;
-
-import lombok.extern.slf4j.Slf4j;
-
-import stirling.software.spdf.proprietary.security.configuration.ApplicationPropertiesConfiguration;
-import stirling.software.spdf.proprietary.security.util.GeneralUtil;
+import stirling.software.common.model.ApplicationProperties;
+import stirling.software.common.util.GeneralUtil;
 
 @Slf4j
 @Service
@@ -45,10 +41,10 @@ public class KeygenLicenseVerifier {
     private static final String JWT_PREFIX = "key/";
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
-    private final ApplicationPropertiesConfiguration applicationProperties;
+    private final ApplicationProperties applicationProperties;
 
     @Autowired
-    public KeygenLicenseVerifier(ApplicationPropertiesConfiguration applicationProperties) {
+    public KeygenLicenseVerifier(ApplicationProperties applicationProperties) {
         this.applicationProperties = applicationProperties;
     }
 

@@ -1,40 +1,32 @@
 package stirling.software.spdf.proprietary.security;
 
+import com.coveo.saml.SamlClient;
+import com.coveo.saml.SamlException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateKey;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.springframework.core.io.Resource;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.security.saml2.provider.service.authentication.Saml2Authentication;
-import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
-
-import com.coveo.saml.SamlClient;
-import com.coveo.saml.SamlException;
-
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
-import stirling.software.spdf.proprietary.security.configuration.ApplicationPropertiesConfiguration;
-import stirling.software.spdf.proprietary.security.model.provider.KeycloakProvider;
+import org.springframework.core.io.Resource;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.saml2.provider.service.authentication.Saml2Authentication;
+import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
+import stirling.software.common.model.ApplicationProperties;
 import stirling.software.spdf.proprietary.security.sso.saml2.CustomSaml2AuthenticatedPrincipal;
 import stirling.software.spdf.proprietary.security.util.CertificateUtil;
-import stirling.software.spdf.proprietary.security.util.UrlUtil;
 
 @Slf4j
 @AllArgsConstructor
+// todo: figure out way for OSS version to use this class
 public class CustomLogoutSuccessHandler extends SimpleUrlLogoutSuccessHandler {
 
     public static final String LOGOUT_PATH = "/login?logout=true";
 
-    private final ApplicationPropertiesConfiguration applicationProperties;
+    private final ApplicationProperties applicationProperties;
 
     @Override
     public void onLogoutSuccess(
@@ -45,12 +37,6 @@ public class CustomLogoutSuccessHandler extends SimpleUrlLogoutSuccessHandler {
                 if (authentication instanceof Saml2Authentication samlAuthentication) {
                     // Handle SAML2 logout redirection
                     getRedirect_saml2(request, response, samlAuthentication);
-                } else if (authentication instanceof OAuth2AuthenticationToken oAuthToken) {
-                    // Handle OAuth2 logout redirection
-                    getRedirect_oauth2(request, response, oAuthToken);
-                } else if (authentication instanceof UsernamePasswordAuthenticationToken) {
-                    // Handle Username/Password logout
-                    getRedirectStrategy().sendRedirect(request, response, LOGOUT_PATH);
                 } else {
                     // Handle unknown authentication types
                     log.error(
@@ -73,7 +59,7 @@ public class CustomLogoutSuccessHandler extends SimpleUrlLogoutSuccessHandler {
             Saml2Authentication samlAuthentication)
             throws IOException {
 
-        ApplicationPropertiesConfiguration.Security.SAML2 samlConf =
+        ApplicationProperties.Security.SAML2 samlConf =
                 applicationProperties.getSecurity().getSaml2();
         String registrationId = samlConf.getRegistrationId();
 
@@ -112,68 +98,9 @@ public class CustomLogoutSuccessHandler extends SimpleUrlLogoutSuccessHandler {
         }
     }
 
-    // Redirect for OAuth2 authentication logout
-    private void getRedirect_oauth2(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            OAuth2AuthenticationToken oAuthToken)
-            throws IOException {
-        String registrationId;
-        ApplicationPropertiesConfiguration.Security.OAUTH2 oauth =
-                applicationProperties.getSecurity().getOauth2();
-        String path = checkForErrors(request);
-
-        String redirectUrl = UrlUtil.getOrigin(request) + "/login?" + path;
-        registrationId = oAuthToken.getAuthorizedClientRegistrationId();
-
-        // Redirect based on OAuth2 provider
-        switch (registrationId.toLowerCase()) {
-            case "keycloak" -> {
-                KeycloakProvider keycloak = oauth.getClient().getKeycloak();
-
-                boolean isKeycloak = !keycloak.getIssuer().isBlank();
-                boolean isCustomOAuth = !oauth.getIssuer().isBlank();
-
-                String logoutUrl = redirectUrl;
-
-                if (isKeycloak) {
-                    logoutUrl = keycloak.getIssuer();
-                } else if (isCustomOAuth) {
-                    logoutUrl = oauth.getIssuer();
-                }
-                if (isKeycloak || isCustomOAuth) {
-                    logoutUrl +=
-                            "/protocol/openid-connect/logout"
-                                    + "?client_id="
-                                    + oauth.getClientId()
-                                    + "&post_logout_redirect_uri="
-                                    + response.encodeRedirectURL(redirectUrl);
-                    log.info("Redirecting to Keycloak logout URL: {}", logoutUrl);
-                } else {
-                    log.info(
-                            "No redirect URL for {} available. Redirecting to default logout URL: {}",
-                            registrationId,
-                            logoutUrl);
-                }
-                response.sendRedirect(logoutUrl);
-            }
-            case "github", "google" -> {
-                log.info(
-                        "No redirect URL for {} available. Redirecting to default logout URL: {}",
-                        registrationId,
-                        redirectUrl);
-                response.sendRedirect(redirectUrl);
-            }
-            default -> {
-                log.info("Redirecting to default logout URL: {}", redirectUrl);
-                response.sendRedirect(redirectUrl);
-            }
-        }
-    }
-
     private static SamlClient getSamlClient(
             String registrationId,
-            ApplicationPropertiesConfiguration.Security.SAML2 samlConf,
+            ApplicationProperties.Security.SAML2 samlConf,
             List<X509Certificate> certificates)
             throws SamlException {
         // todo: move base url to util or configuration class

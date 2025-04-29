@@ -41,6 +41,7 @@ import stirling.software.SPDF.model.User;
 import stirling.software.SPDF.repository.JPATokenRepositoryImpl;
 import stirling.software.SPDF.repository.PersistentLoginRepository;
 import stirling.software.common.model.ApplicationProperties;
+import stirling.software.common.service.UserService;
 
 @Configuration
 @EnableWebSecurity

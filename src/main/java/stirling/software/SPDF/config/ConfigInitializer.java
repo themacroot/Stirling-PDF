@@ -14,6 +14,7 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 
 import stirling.software.common.configuration.InstallationPathConfig;
+import stirling.software.common.configuration.YamlHelper;
 
 /**
  * A naive, line-based approach to merging "settings.yml" with "settings.yml.template" while

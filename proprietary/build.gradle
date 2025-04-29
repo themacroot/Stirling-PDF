@@ -42,6 +42,7 @@ dependencyManagement {
 }
 
 dependencies {
+    compileOnly project(':common')
     compileOnly 'org.springframework.boot:spring-boot-starter-web'
     compileOnly 'org.springframework.boot:spring-boot-starter-jetty'
     implementation 'org.springframework.session:spring-session-core:3.4.2'

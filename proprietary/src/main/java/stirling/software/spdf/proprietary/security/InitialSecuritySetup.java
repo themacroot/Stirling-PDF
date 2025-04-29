@@ -11,7 +11,7 @@ import jakarta.annotation.PostConstruct;
 
 import lombok.extern.slf4j.Slf4j;
 
-import stirling.software.spdf.proprietary.security.configuration.ApplicationPropertiesConfiguration;
+import stirling.software.common.model.ApplicationProperties;
 import stirling.software.spdf.proprietary.security.model.enumeration.Role;
 import stirling.software.spdf.proprietary.security.model.exception.UnsupportedProviderException;
 import stirling.software.spdf.proprietary.security.service.DatabaseServiceInterface;
@@ -24,13 +24,13 @@ public class InitialSecuritySetup {
 
     private final UserService userService;
 
-    private final ApplicationPropertiesConfiguration applicationProperties;
+    private final ApplicationProperties applicationProperties;
 
     private final DatabaseServiceInterface databaseService;
 
     public InitialSecuritySetup(
             @Lazy UserService userService,
-            ApplicationPropertiesConfiguration applicationProperties,
+            ApplicationProperties applicationProperties,
             @Lazy DatabaseServiceInterface databaseService) {
         this.userService = userService;
         this.applicationProperties = applicationProperties;

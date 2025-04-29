@@ -36,7 +36,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import lombok.extern.slf4j.Slf4j;
 
-import stirling.software.spdf.proprietary.security.configuration.ApplicationPropertiesConfiguration;
+import stirling.software.common.model.ApplicationProperties;
 import stirling.software.spdf.proprietary.security.model.api.user.UsernameAndPass;
 import stirling.software.spdf.proprietary.security.model.enumeration.AuthenticationType;
 import stirling.software.spdf.proprietary.security.model.enumeration.Role;
@@ -56,12 +56,12 @@ public class UserController {
     private static final String LOGIN_MESSAGETYPE_CREDSUPDATED = "/login?messageType=credsUpdated";
     private final UserService userService;
     private final SessionPersistentRegistry sessionRegistry;
-    private final ApplicationPropertiesConfiguration applicationProperties;
+    private final ApplicationProperties applicationProperties;
 
     public UserController(
             @Lazy @Autowired(required = false) UserService userService,
             @Lazy @Autowired(required = false) SessionPersistentRegistry sessionRegistry,
-            ApplicationPropertiesConfiguration applicationProperties) {
+            ApplicationProperties applicationProperties) {
         this.userService = userService;
         this.sessionRegistry = sessionRegistry;
         this.applicationProperties = applicationProperties;

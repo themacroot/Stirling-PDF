@@ -18,41 +18,33 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import javax.sql.DataSource;
-
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.jdbc.datasource.init.CannotReadScriptException;
 import org.springframework.jdbc.datasource.init.ScriptException;
 import org.springframework.stereotype.Service;
-
-import lombok.extern.slf4j.Slf4j;
-
-import stirling.software.spdf.proprietary.security.configuration.ApplicationPropertiesConfiguration;
-import stirling.software.spdf.proprietary.security.configuration.InstallationPathConfiguration;
+import stirling.software.common.configuration.InstallationPathConfig;
+import stirling.software.common.model.ApplicationProperties;
 import stirling.software.spdf.proprietary.security.model.FileInfo;
 import stirling.software.spdf.proprietary.security.model.exception.BackupNotFoundException;
 
-@Lazy
 @Slf4j
 @Service
-@ConditionalOnProperty(name = "premium.proFeatures.database", havingValue = "true")
 public class DatabaseService implements DatabaseServiceInterface {
 
     public static final String BACKUP_PREFIX = "backup_";
     public static final String SQL_SUFFIX = ".sql";
     private final Path BACKUP_DIR;
 
-    private final ApplicationPropertiesConfiguration applicationProperties;
+    private final ApplicationProperties applicationProperties;
     private final DataSource dataSource;
 
     public DatabaseService(
-            ApplicationPropertiesConfiguration applicationProperties,
-            @Lazy @Autowired(required = false) DataSource dataSource) {
+            ApplicationProperties applicationProperties,
+            @Autowired(required = false) DataSource dataSource) {
         this.BACKUP_DIR =
-                Paths.get(InstallationPathConfiguration.getConfigPath(), "db", "backup")
+                Paths.get(InstallationPathConfig.getConfigPath(), "db", "backup")
                         .normalize();
         this.applicationProperties = applicationProperties;
         this.dataSource = dataSource;
@@ -245,12 +237,12 @@ public class DatabaseService implements DatabaseServiceInterface {
     }
 
     private boolean isH2Database() {
-        ApplicationPropertiesConfiguration.Datasource datasource =
+        ApplicationProperties.Datasource datasource =
                 applicationProperties.getSystem().getDatasource();
         return !datasource.isEnableCustomDatabase()
                 || datasource
                         .getType()
-                        .equalsIgnoreCase(ApplicationPropertiesConfiguration.Driver.H2.name());
+                        .equalsIgnoreCase(ApplicationProperties.Driver.H2.name());
     }
 
     /**

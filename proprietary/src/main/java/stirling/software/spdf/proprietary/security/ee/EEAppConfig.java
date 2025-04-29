@@ -1,7 +1,5 @@
 package stirling.software.spdf.proprietary.security.ee;
 
-import static stirling.software.spdf.proprietary.security.configuration.ApplicationPropertiesConfiguration.*;
-import static stirling.software.spdf.proprietary.security.configuration.ApplicationPropertiesConfiguration.Premium.ProFeatures.*;
 import static stirling.software.spdf.proprietary.security.ee.KeygenLicenseVerifier.*;
 
 import org.springframework.context.annotation.Bean;
@@ -11,19 +9,19 @@ import org.springframework.core.annotation.Order;
 
 import lombok.extern.slf4j.Slf4j;
 
-import stirling.software.spdf.proprietary.security.configuration.ApplicationPropertiesConfiguration;
+import stirling.software.common.model.ApplicationProperties;
 
 @Slf4j
 @Configuration
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class EEAppConfig {
 
-    private final ApplicationPropertiesConfiguration applicationProperties;
+    private final ApplicationProperties applicationProperties;
 
     private final LicenseKeyChecker licenseKeyChecker;
 
     public EEAppConfig(
-            ApplicationPropertiesConfiguration applicationProperties,
+            ApplicationProperties applicationProperties,
             LicenseKeyChecker licenseKeyChecker) {
         this.applicationProperties = applicationProperties;
         this.licenseKeyChecker = licenseKeyChecker;
@@ -57,15 +55,15 @@ public class EEAppConfig {
     }
 
     @Bean(name = "GoogleDriveConfig")
-    public GoogleDrive googleDriveConfig() {
+    public ApplicationProperties.Premium.ProFeatures.GoogleDrive googleDriveConfig() {
         return applicationProperties.getPremium().getProFeatures().getGoogleDrive();
     }
 
     // TODO: Remove post migration
     public void migrateEnterpriseSettingsToPremium(
-            ApplicationPropertiesConfiguration applicationProperties) {
-        EnterpriseEdition enterpriseEdition = applicationProperties.getEnterpriseEdition();
-        Premium premium = applicationProperties.getPremium();
+            ApplicationProperties applicationProperties) {
+        ApplicationProperties.EnterpriseEdition enterpriseEdition = applicationProperties.getEnterpriseEdition();
+        ApplicationProperties.Premium premium = applicationProperties.getPremium();
 
         // Only proceed if both objects exist
         if (enterpriseEdition == null || premium == null) {
@@ -92,9 +90,9 @@ public class EEAppConfig {
         }
 
         // Copy CustomMetadata settings
-        Premium.ProFeatures.CustomMetadata premiumMetadata =
+        ApplicationProperties.Premium.ProFeatures.CustomMetadata premiumMetadata =
                 premium.getProFeatures().getCustomMetadata();
-        EnterpriseEdition.CustomMetadata enterpriseMetadata = enterpriseEdition.getCustomMetadata();
+        ApplicationProperties.EnterpriseEdition.CustomMetadata enterpriseMetadata = enterpriseEdition.getCustomMetadata();
 
         if (enterpriseMetadata != null && premiumMetadata != null) {
             // Copy autoUpdateMetadata setting

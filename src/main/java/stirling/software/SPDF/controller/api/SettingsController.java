@@ -17,7 +17,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 import stirling.software.SPDF.config.EndpointConfiguration;
-import stirling.software.SPDF.utils.GeneralUtils;
+import stirling.software.common.util.GeneralUtil;
 import stirling.software.common.configuration.InstallationPathConfig;
 import stirling.software.common.model.ApplicationProperties;
 
@@ -40,7 +40,7 @@ public class SettingsController {
                             "Setting has already been set, To adjust please edit "
                                     + InstallationPathConfig.getSettingsPath());
         }
-        GeneralUtils.saveKeyToSettings("system.enableAnalytics", enabled);
+        GeneralUtil.saveKeyToSettings("system.enableAnalytics", enabled);
         applicationProperties.getSystem().setEnableAnalytics(enabled);
         return ResponseEntity.ok("Updated");
     }

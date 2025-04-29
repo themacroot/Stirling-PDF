@@ -28,7 +28,7 @@ import stirling.software.SPDF.config.RuntimePathConfig;
 import stirling.software.SPDF.controller.api.pipeline.UserServiceInterface;
 import stirling.software.SPDF.model.SignatureFile;
 import stirling.software.SPDF.service.SignatureService;
-import stirling.software.SPDF.utils.GeneralUtils;
+import stirling.software.common.util.GeneralUtil;
 import stirling.software.common.configuration.InstallationPathConfig;
 
 @Controller
@@ -240,7 +240,7 @@ public class GeneralWebController {
     private List<FontResource> getFontNamesFromLocation(String locationPattern) {
         try {
             Resource[] resources =
-                    GeneralUtils.getResourcesFromLocationPattern(locationPattern, resourceLoader);
+                    GeneralUtil.getResourcesFromLocationPattern(locationPattern, resourceLoader);
             return Arrays.stream(resources)
                     .map(
                             resource -> {

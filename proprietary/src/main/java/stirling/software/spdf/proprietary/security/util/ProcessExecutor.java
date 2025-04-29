@@ -1,5 +1,6 @@
 package stirling.software.spdf.proprietary.security.util;
 
+import io.github.pixee.security.BoundedLineReader;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -12,19 +13,15 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
-
-import io.github.pixee.security.BoundedLineReader;
-
 import lombok.extern.slf4j.Slf4j;
-
-import stirling.software.spdf.proprietary.security.configuration.ApplicationPropertiesConfiguration;
+import stirling.software.common.model.ApplicationProperties;
 
 @Slf4j
 public class ProcessExecutor {
 
     private static final Map<Processes, ProcessExecutor> instances = new ConcurrentHashMap<>();
-    private static ApplicationPropertiesConfiguration applicationProperties =
-            new ApplicationPropertiesConfiguration();
+    private static ApplicationProperties applicationProperties =
+            new ApplicationProperties();
     private final Semaphore semaphore;
     private final boolean liveUpdates;
     private long timeoutDuration;
@@ -131,7 +128,7 @@ public class ProcessExecutor {
                                                 .getCalibreTimeoutMinutes();
                             };
                     //                    return new
-                    // ApplicationPropertiesConfiguration.ProcessExecutor(semaphoreLimit,
+                    // ApplicationProperties.ProcessExecutor(semaphoreLimit,
                     // liveUpdates, timeoutMinutes);
                     return new stirling.software.spdf.proprietary.security.util.ProcessExecutor(
                             semaphoreLimit, liveUpdates, timeoutMinutes);

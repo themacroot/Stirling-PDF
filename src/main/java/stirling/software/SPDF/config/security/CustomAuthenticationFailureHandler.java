@@ -16,9 +16,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import lombok.extern.slf4j.Slf4j;
-
-import stirling.software.spdf.proprietary.security.persistence.UserEntity;
-import stirling.software.spdf.proprietary.security.service.UserService;
+import stirling.software.common.service.UserService;
 
 @Slf4j
 public class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationFailureHandler {
